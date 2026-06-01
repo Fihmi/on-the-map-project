@@ -1,0 +1,139 @@
+// Import images for Trip 1
+import trip1_1 from '../assets/Products/Trip 1/53.jpg';
+import trip1_2 from '../assets/Products/Trip 1/Muse_bardo_tunis.jpg';
+import trip1_3 from '../assets/Products/Trip 1/scale.webp';
+import trip1_4 from '../assets/Products/Trip 1/traditional-rooftop-in-tunis.jpg';
+import trip1_5 from '../assets/Products/Trip 1/av_bourguiba.jpg';
+
+// Import images for Trip 2
+import trip2_1 from '../assets/Products/Trip 2/99.jpg';
+import trip2_2 from '../assets/Products/Trip 2/coast-of-Mahdia.jpg';
+import trip2_3 from '../assets/Products/Trip 2/images.jpg';
+import trip2_4 from '../assets/Products/Trip 2/istockphoto-1220408762-612x612.jpg';
+import trip2_5 from '../assets/Products/Trip 2/ribat_monastir.jpg';
+
+// Import images for Trip 3
+import trip3_1 from '../assets/Products/Trip 3/469956058_122134759970389559_3631471867594414492_n.jpg';
+import trip3_2 from '../assets/Products/Trip 3/batch_IMG_E0877-1024x575.jpg.webp';
+import trip3_3 from '../assets/Products/Trip 3/lac-majeur-private-beach.jpg';
+import trip3_4 from '../assets/Products/Trip 3/eee.jpg';
+import trip3_5 from '../assets/Products/Trip 3/images.jpg';
+
+// Import images for Trip 4
+import trip4_1 from '../assets/Products/Trip 4/107287902-3118162874907805-3778583752709480598-o.jpg';
+import trip4_2 from '../assets/Products/Trip 4/3cbc3003-580c-4339-b35e-8023904783b6.jpg';
+import trip4_3 from '../assets/Products/Trip 4/Sogno1.jpg';
+import trip4_4 from '../assets/Products/Trip 4/il-sogno-camp-1.jpg';
+import trip4_5 from '../assets/Products/Trip 4/karaoke-camping-correze.jpg';
+
+// Import images for Trip 5
+import trip5_1 from '../assets/Products/Trip 5/673744990_2484113612037779_5432598887552728799_n.jpg';
+import trip5_2 from '../assets/Products/Trip 5/689083718_1483833363540122_3205337874253366856_n.jpg';
+import trip5_3 from '../assets/Products/Trip 5/705842733_1409550527876454_2179043622010030311_n.jpg';
+import trip5_4 from '../assets/Products/Trip 5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
+import trip5_5 from '../assets/Products/Trip 5/mljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGdHVuNHJlYWwuY29tJTJGd3AtY29udGVudCUyRnVwbG9hZHMlMkYyMDI1JTJGMDIlMkYzMDU2MjA4NThfMTQ4NjM3MTkxMTg2OTQ4OV8zMjQyNjI0Mjk5NzIxMTQxNzMyX24tMS5qcGcmY2FjaGVNYXJrZXI9MTczOTI5OTcwMi0yNzYwNDkmdG9rZW49NjY3N2FmZGE2NTU5NDgyNg.q.jpg';
+
+export interface Trip {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  description: string;
+  amenities: string[];
+  images: string[];
+  coordinates?: [number, number]; // [lat, lng]
+  isPremium?: boolean;
+  circuit?: string[];
+  date?: string;
+}
+
+export const tripsData: Trip[] = [
+  {
+    id: 'trip-1',
+    title: 'Historic Tunis City Tour',
+    location: 'Tunis, Tunisia',
+    price: 30,
+    rating: 4.8,
+    reviews: 124,
+    description: 'Discover the treasures of Tunis through a journey to the iconic Bardo Museum, the historic Medina of Tunis, and the charming village of Sidi Bou Said. Experience Tunisia’s rich heritage, vibrant culture, and stunning Mediterranean views in one unforgettable day.',
+    amenities: ['Guided Tour', 'Museum Tickets', 'Lunch Included', 'Transport'],
+    images: [trip1_4, trip1_5, trip1_2, trip1_1, trip1_3],
+    coordinates: [36.8065, 10.1815], // Tunis
+    circuit: ['Bardo Museum', 'Medina of Tunis', 'Sidi Bou Said'],
+    date: 'July 11, 2026'
+  },
+  {
+    id: 'trip-2',
+    title: 'El Djem Amphitheater',
+    location: 'Mahdia & Monastir,Tunisia',
+    price: 30,
+    rating: 4.9,
+    reviews: 89,
+    description: 'Step back in time as you explore the impressive El Jem Amphitheatre, discover the coastal charm of Mahdia, and visit the historic landmarks of Monastir. This journey combines Tunisia’s rich history, cultural heritage, and beautiful Mediterranean scenery.',
+    amenities: ['Guided Tour', 'El Jem Amphitheatre Ticket', 'Lunch Included', 'Transport'],
+    images: [trip2_2, trip2_5, trip2_4, trip2_1, trip2_3],
+    coordinates: [35.5047, 11.0622], // Mahdia
+    circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
+    date: 'July 20, 2026'
+  },
+  {
+    id: 'trip-3',
+    title: 'Cap Serrat',
+    location: 'Bizerte, Tunisia',
+    price: 40,
+    rating: 4.7,
+    reviews: 56,
+    description: 'Embark on an exciting adventure to Cap Serrat, one of Tunisia’s most breathtaking natural gems. Enjoy a thrilling 4x4 experience through scenic trails, discover unspoiled landscapes, and take in spectacular views of the Mediterranean coastline.',
+    amenities: ['Private beach', 'Boat & 4x4 Tour', 'Lunch Included', 'Transport'],
+    images: [trip3_3, trip3_1, trip3_2, trip3_4, trip3_5],
+    coordinates: [37.2746, 9.8739], // Bizerte
+    circuit: ['Cap Serrat, Bizerte'],
+    date: 'July 26, 2026'
+  },
+  {
+    id: 'trip-4',
+    title: 'Camping Adventure',
+    location: 'Tunisia',
+    price: 25,
+    rating: 4.6,
+    reviews: 210,
+    description: 'Escape into nature for an unforgettable camping experience filled with fun and connection. Enjoy a cozy campfire, live DJ and party vibes, an outdoor movie night, exciting group games, and a karaoke session under the stars.',
+    amenities: ['Transport', 'Campfire', 'BBQ Area', 'Tente or cabin', 'DJ Set', 'Outdoor Movie Night', 'Games', 'Karaoke Session', 'dinner & breakfast included'],
+    images: [trip4_4, trip4_3, trip4_5, trip4_1, trip4_2],
+    coordinates: [33.9197, 8.1335], // Camping Adventure
+    isPremium: true,
+    circuit: ['Organised Camping Trip'],
+    date: 'August 1 & 2, 2026'
+  },
+  {
+    id: 'trip-5',
+    title: 'Kuriat Island',
+    location: 'Kuriat Island, Tunisia',
+    price: 30,
+    rating: 4.9,
+    reviews: 32,
+    description: 'Sail away to the breathtaking Kuriat Islands on a relaxing boat tour. Spot dolphins in their natural habitat, enjoy crystal-clear waters, and unwind on a secluded beach paradise far from the crowds for a truly exclusive experience.',
+    amenities: ['Transport', 'Boat Tour', 'Lunch Included'],
+    images: [trip5_2, trip5_1, trip5_3, trip5_4, trip5_5],
+    coordinates: [33.8076, 10.8451], // Kuriat Island
+    circuit: ['Kuriat Island'],
+    date: 'July 15, 2026'
+  },
+  {
+    id: 'trip-6',
+    title: 'Sahara Desert Safari',
+    location: 'Tozeur, Tunisia',
+    price: 110,
+    rating: 4.8,
+    reviews: 156,
+    description: 'Experience the magic of the Tunisian Sahara with a journey through Tozeur, the stunning oasis of Chebika, and the famous Ong Jmal. Ride across the golden sand dunes in a thrilling 4x4 adventure and explore iconic filming locations from the legendary Star Wars saga.',
+    amenities: ['4x4 Desert Adventure', 'Star Wars Filming Sites', 'accommodation', 'Lanch included', 'Transport Confortable'],
+    images: [trip4_1, trip4_2, trip4_3, trip4_4, trip4_5],
+    coordinates: [33.4550, 9.0253],
+    isPremium: true,
+    circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
+    date: 'July 22 & 23, 2026'
+  }
+];

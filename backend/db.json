@@ -1,0 +1,18 @@
+{
+  "users": [],
+  "reservations": [
+    {
+      "_id": "1780132903836",
+      "tripId": "trip-1",
+      "tripName": "Historic Tunis City Tour",
+      "customerName": "aaaaaaaa",
+      "customerEmail": "mm@pp.d",
+      "customerPhone": "789652896",
+      "guests": 1,
+      "date": "August 15, 2026",
+      "status": "Paid",
+      "createdAt": "2026-05-30T09:21:43.836Z",
+      "updatedAt": "2026-05-31T19:47:33.508Z"
+    }
+  ]
+}

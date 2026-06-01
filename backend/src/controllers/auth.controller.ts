@@ -1,0 +1,173 @@
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+// import { User } from '../models/user.model';
+import { readDB, writeDB, UserDB } from '../utils/jsonDb';
+
+const generateTokens = (userId: string) => {
+  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET as string, { expiresIn: '7d' });
+  return { accessToken, refreshToken };
+};
+
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { name, email, password } = req.body;
+
+    const db = readDB();
+    const existingUser = db.users.find(u => u.email === email);
+    if (existingUser) {
+      res.status(400).json({ success: false, message: 'User already exists' });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newUser: UserDB = {
+      _id: Date.now().toString(),
+      name,
+      email,
+      passwordHash,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const { accessToken, refreshToken } = generateTokens(newUser._id);
+    newUser.refreshToken = refreshToken;
+
+    db.users.push(newUser);
+    writeDB(db);
+
+    res.cookie('jwt', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
+      sameSite: 'strict', // Prevent CSRF attacks
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        accessToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    const db = readDB();
+    const user = db.users.find(u => u.email === email);
+    if (!user) {
+      res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return;
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user._id);
+
+    user.refreshToken = refreshToken;
+    user.updatedAt = new Date().toISOString();
+    writeDB(db);
+
+    res.cookie('jwt', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        accessToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const refreshToken = req.cookies.jwt;
+    if (!refreshToken) {
+      res.status(401).json({ success: false, message: 'Not authorized, no refresh token' });
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: string };
+      
+      const db = readDB();
+      const user = db.users.find(u => u._id === decoded.userId);
+
+      if (!user || user.refreshToken !== refreshToken) {
+        res.status(401).json({ success: false, message: 'Not authorized, invalid refresh token' });
+        return;
+      }
+
+      const tokens = generateTokens(user._id);
+
+      user.refreshToken = tokens.refreshToken;
+      user.updatedAt = new Date().toISOString();
+      writeDB(db);
+
+      res.cookie('jwt', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      res.json({
+        success: true,
+        accessToken: tokens.accessToken,
+      });
+    } catch (error) {
+      res.status(401).json({ success: false, message: 'Not authorized, invalid refresh token' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const refreshToken = req.cookies.jwt;
+    if (refreshToken) {
+      const db = readDB();
+      const user = db.users.find(u => u.refreshToken === refreshToken);
+      if (user) {
+        user.refreshToken = '';
+        user.updatedAt = new Date().toISOString();
+        writeDB(db);
+      }
+    }
+
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
