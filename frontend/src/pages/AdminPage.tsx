@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, MapPin, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X } from 'lucide-react';
+import { Users, Calendar, MapPin, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { tripsData } from '../data/trips';
 
@@ -73,7 +73,9 @@ export const AdminPage = () => {
     e.preventDefault();
     if (!selectedTripId) return;
 
-    const trip = tripsData.find(t => t.id === selectedTripId);
+    const trip = selectedTripId === 'pack-ultimate' 
+      ? { id: 'pack-ultimate', title: 'Ultimate Package (Except Sahara)', date: 'Various' } as any
+      : tripsData.find(t => t.id === selectedTripId);
     if (!trip) return;
 
     try {
@@ -112,11 +114,38 @@ export const AdminPage = () => {
       };
     });
 
+    const packReservations = reservations.filter(r => r.tripId === 'pack-ultimate');
+
     return (
       <div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-slate-900">Trip Dashboard</h2>
           <p className="text-slate-500 mt-2">Select a trip to view its registrations.</p>
+        </div>
+
+        {/* Ultimate Package Card */}
+        <div className="mb-8">
+          <div
+            onClick={() => setSelectedTripId('pack-ultimate')}
+            className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all group relative p-6 sm:p-8"
+          >
+            <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shrink-0">
+                  <Package className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-white">Ultimate Package</h3>
+                  <p className="text-white/80 text-sm mt-1">All trips except Sahara · <span className="line-through">€160</span> <span className="font-bold text-white">€145</span>/person</p>
+                </div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-md rounded-xl px-6 py-3 text-center border border-white/30">
+                <div className="text-xs font-bold text-white/80 uppercase tracking-widest">Bookings</div>
+                <div className="text-4xl font-black text-white">{packReservations.length}</div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -149,7 +178,10 @@ export const AdminPage = () => {
   };
 
   const renderDetailedView = () => {
-    const trip = tripsData.find(t => t.id === selectedTripId);
+    const isPackView = selectedTripId === 'pack-ultimate';
+    const trip = isPackView
+      ? null
+      : tripsData.find(t => t.id === selectedTripId);
     const tripReservations = reservations.filter(r => r.tripId === selectedTripId);
 
     return (
@@ -172,20 +204,39 @@ export const AdminPage = () => {
             </button>
           </div>
           
-          <div className="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-6">
-              <div className="h-20 w-20 rounded-xl overflow-hidden shrink-0">
-                <img src={trip?.images[0]} alt={trip?.title} className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-slate-900">{trip?.title}</h2>
-                <div className="flex items-center text-slate-500 mt-2 gap-4">
-                  <span className="flex items-center"><Calendar className="w-4 h-4 mr-1"/> {trip?.date}</span>
-                  <span className="flex items-center text-teal-600 font-bold"><Users className="w-4 h-4 mr-1"/> {tripReservations.length} Registrations</span>
+          {isPackView ? (
+            <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 p-6 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
+              <div className="flex items-center gap-6 relative z-10">
+                <div className="h-20 w-20 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30">
+                  <Package className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white">Ultimate Package</h2>
+                  <div className="flex items-center text-white/80 mt-2 gap-4">
+                    <span className="flex items-center"><Calendar className="w-4 h-4 mr-1"/> Various dates</span>
+                    <span className="flex items-center text-white font-bold"><Users className="w-4 h-4 mr-1"/> {tripReservations.length} Bookings</span>
+                    <span className="bg-white/20 backdrop-blur-md px-3 py-0.5 rounded-full text-xs font-bold border border-white/30">€145/person</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-6">
+                <div className="h-20 w-20 rounded-xl overflow-hidden shrink-0">
+                  <img src={trip?.images[0]} alt={trip?.title} className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-slate-900">{trip?.title}</h2>
+                  <div className="flex items-center text-slate-500 mt-2 gap-4">
+                    <span className="flex items-center"><Calendar className="w-4 h-4 mr-1"/> {trip?.date}</span>
+                    <span className="flex items-center text-teal-600 font-bold"><Users className="w-4 h-4 mr-1"/> {tripReservations.length} Registrations</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {tripReservations.length === 0 ? (

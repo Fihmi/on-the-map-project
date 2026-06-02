@@ -45,6 +45,7 @@ export interface Trip {
   images: string[];
   coordinates?: [number, number]; // [lat, lng]
   isPremium?: boolean;
+  isCovered?: boolean;
   circuit?: string[];
   date?: string;
 }
@@ -61,8 +62,24 @@ export const tripsData: Trip[] = [
     amenities: ['Guided Tour', 'Museum Tickets', 'Lunch Included', 'Transport'],
     images: [trip1_4, trip1_5, trip1_2, trip1_1, trip1_3],
     coordinates: [36.8065, 10.1815], // Tunis
+    isCovered: true,
     circuit: ['Bardo Museum', 'Medina of Tunis', 'Sidi Bou Said'],
     date: 'July 11, 2026'
+  },
+  {
+    id: 'trip-5',
+    title: 'Kuriat Island',
+    location: 'Kuriat Island, Tunisia',
+    price: 35,
+    rating: 4.9,
+    reviews: 32,
+    description: 'Sail away to the breathtaking Kuriat Islands on a relaxing boat tour. Spot dolphins in their natural habitat, enjoy crystal-clear waters, and unwind on a secluded beach paradise far from the crowds for a truly exclusive experience.',
+    amenities: ['Transport', 'Boat Tour', 'Lunch Included'],
+    images: [trip5_2, trip5_1, trip5_3, trip5_4, trip5_5],
+    coordinates: [33.8076, 10.8451], // Kuriat Island
+    isCovered: true,
+    circuit: ['Kuriat Island'],
+    date: 'July 15, 2026'
   },
   {
     id: 'trip-2',
@@ -75,8 +92,23 @@ export const tripsData: Trip[] = [
     amenities: ['Guided Tour', 'El Jem Amphitheatre Ticket', 'Lunch Included', 'Transport'],
     images: [trip2_2, trip2_5, trip2_4, trip2_1, trip2_3],
     coordinates: [35.5047, 11.0622], // Mahdia
+    isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
     date: 'July 20, 2026'
+  },
+  {
+    id: 'trip-6',
+    title: 'Sahara Desert Safari',
+    location: 'Tozeur, Tunisia',
+    price: 110,
+    rating: 4.8,
+    reviews: 156,
+    description: 'Experience the magic of the Tunisian Sahara with a journey through Tozeur, the stunning oasis of Chebika, and the famous Ong Jmal. Ride across the golden sand dunes in a thrilling 4x4 adventure and explore iconic filming locations from the legendary Star Wars saga.',
+    amenities: ['4x4 Desert Adventure', 'Star Wars Filming Sites', 'accommodation', 'Lanch included', 'Transport Confortable'],
+    images: [trip4_1, trip4_2, trip4_3, trip4_4, trip4_5],
+    coordinates: [33.4550, 9.0253],
+    circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
+    date: 'July 22 & 23, 2026'
   },
   {
     id: 'trip-3',
@@ -104,36 +136,8 @@ export const tripsData: Trip[] = [
     images: [trip4_4, trip4_3, trip4_5, trip4_1, trip4_2],
     coordinates: [33.9197, 8.1335], // Camping Adventure
     isPremium: true,
+    isCovered: true,
     circuit: ['Organised Camping Trip'],
     date: 'August 1 & 2, 2026'
-  },
-  {
-    id: 'trip-5',
-    title: 'Kuriat Island',
-    location: 'Kuriat Island, Tunisia',
-    price: 30,
-    rating: 4.9,
-    reviews: 32,
-    description: 'Sail away to the breathtaking Kuriat Islands on a relaxing boat tour. Spot dolphins in their natural habitat, enjoy crystal-clear waters, and unwind on a secluded beach paradise far from the crowds for a truly exclusive experience.',
-    amenities: ['Transport', 'Boat Tour', 'Lunch Included'],
-    images: [trip5_2, trip5_1, trip5_3, trip5_4, trip5_5],
-    coordinates: [33.8076, 10.8451], // Kuriat Island
-    circuit: ['Kuriat Island'],
-    date: 'July 15, 2026'
-  },
-  {
-    id: 'trip-6',
-    title: 'Sahara Desert Safari',
-    location: 'Tozeur, Tunisia',
-    price: 110,
-    rating: 4.8,
-    reviews: 156,
-    description: 'Experience the magic of the Tunisian Sahara with a journey through Tozeur, the stunning oasis of Chebika, and the famous Ong Jmal. Ride across the golden sand dunes in a thrilling 4x4 adventure and explore iconic filming locations from the legendary Star Wars saga.',
-    amenities: ['4x4 Desert Adventure', 'Star Wars Filming Sites', 'accommodation', 'Lanch included', 'Transport Confortable'],
-    images: [trip4_1, trip4_2, trip4_3, trip4_4, trip4_5],
-    coordinates: [33.4550, 9.0253],
-    isPremium: true,
-    circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
-    date: 'July 22 & 23, 2026'
   }
 ];

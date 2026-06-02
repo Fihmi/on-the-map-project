@@ -9,12 +9,23 @@ import { InstagramPhone } from '../components/ui/InstagramPhone';
 import { AdPopup } from '../components/ui/AdPopup';
 import { tripsData } from '../data/trips';
 import type { Trip } from '../data/trips';
-import { Map, Compass, Camera } from 'lucide-react';
+import { Map, Compass, Camera, User, Mail, Phone, Check, Loader2 } from 'lucide-react';
+import { apiClient } from '../api/client';
 import videoLanding from '../assets/video landing.mp4';
 
 export const LandingPage = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const [showPackForm, setShowPackForm] = useState(false);
+  const [packFormData, setPackFormData] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+  });
+  const [isPackSubmitting, setIsPackSubmitting] = useState(false);
+  const [packSubmitSuccess, setPackSubmitSuccess] = useState(false);
+  const [packSubmitError, setPackSubmitError] = useState('');
 
   const heroImages = [
     tripsData[0]?.images[0] || '',
@@ -191,23 +202,122 @@ export const LandingPage = () => {
                     Don't Miss Out!
                   </h3>
                   <p className="text-xl md:text-2xl font-medium text-white/90 drop-shadow">
-                    Experience the ultimate Tunisian adventure. You can get <strong className="font-black text-white">ALL the trips</strong> in our collection for just €200!
+                    Experience the ultimate Tunisian adventure. You can get <strong className="font-black text-white">ALL the trips</strong> in our collection (except Sahara) for a special discounted price!
                   </p>
                 </div>
                 <div className="md:w-1/3 flex flex-col items-center">
                   <div className="bg-white text-slate-900 rounded-2xl p-6 text-center shadow-xl transform rotate-2 w-full max-w-sm">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Package</div>
-                    <div className="flex justify-center items-end gap-1 mb-4">
-                      <span className="text-2xl font-bold text-slate-400">€</span>
-                      <span className="text-6xl font-black leading-none tracking-tighter">200</span>
-                      <span className="text-slate-500 font-medium pb-1">/person</span>
+                    
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg font-bold text-slate-400 line-through">€160</span>
+                        <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider">Save €15</span>
+                      </div>
+                      <div className="flex justify-center items-end gap-1">
+                        <span className="text-2xl font-bold text-orange-500">€</span>
+                        <span className="text-6xl font-black leading-none tracking-tighter text-slate-900">145</span>
+                        <span className="text-slate-500 font-medium pb-1">/person</span>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => alert("Redirecting to the Ultimate Package booking page...")}
-                      className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors shadow-md"
-                    >
-                      Claim Offer Now
-                    </button>
+                    {packSubmitSuccess ? (
+                      <div className="bg-green-50 text-green-700 p-4 rounded-xl text-center border border-green-200 w-full mt-4">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Check size={20} className="text-green-600" />
+                        </div>
+                        <h4 className="font-bold text-base mb-1">Reservation Confirmed!</h4>
+                        <p className="text-xs mb-3">Thank you for booking. We will contact you shortly.</p>
+                        <button 
+                          onClick={() => setPackSubmitSuccess(false)}
+                          className="text-green-700 font-semibold underline text-xs"
+                        >
+                          Book another
+                        </button>
+                      </div>
+                    ) : showPackForm ? (
+                      <form className="text-left w-full mt-2" onSubmit={async (e) => {
+                        e.preventDefault();
+                        setIsPackSubmitting(true);
+                        setPackSubmitError('');
+                        try {
+                          await apiClient.post('/reservations', {
+                            tripId: 'pack-ultimate',
+                            tripName: 'Ultimate Package (Except Sahara)',
+                            date: 'Various',
+                            ...packFormData
+                          });
+                          setPackSubmitSuccess(true);
+                          setPackFormData({ customerName: '', customerEmail: '', customerPhone: '' });
+                        } catch (err: any) {
+                          setPackSubmitError(err.response?.data?.message || 'Failed to submit reservation.');
+                        } finally {
+                          setIsPackSubmitting(false);
+                        }
+                      }}>
+                        <div className="space-y-2 mb-3">
+                          <div className="relative">
+                            <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input 
+                              required
+                              type="text" 
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              placeholder="Full Name"
+                              value={packFormData.customerName}
+                              onChange={e => setPackFormData({...packFormData, customerName: e.target.value})}
+                            />
+                          </div>
+                          <div className="relative">
+                            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input 
+                              required
+                              type="email" 
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              placeholder="Email Address"
+                              value={packFormData.customerEmail}
+                              onChange={e => setPackFormData({...packFormData, customerEmail: e.target.value})}
+                            />
+                          </div>
+                          <div className="relative">
+                            <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input 
+                              required
+                              type="tel" 
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              placeholder="WhatsApp Number"
+                              value={packFormData.customerPhone}
+                              onChange={e => setPackFormData({...packFormData, customerPhone: e.target.value})}
+                            />
+                          </div>
+                        </div>
+
+                        {packSubmitError && (
+                          <div className="mb-3 text-red-600 text-xs bg-red-50 p-2 rounded-lg border border-red-100 text-center">
+                            {packSubmitError}
+                          </div>
+                        )}
+
+                        <button 
+                          type="submit"
+                          disabled={isPackSubmitting}
+                          className="w-full py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md"
+                        >
+                          {isPackSubmitting ? <Loader2 size={16} className="animate-spin" /> : (
+                            <>
+                              <Map className="w-4 h-4" />
+                              Confirm
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => setShowPackForm(true)}
+                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2"
+                      >
+                        <Map className="w-5 h-5" />
+                        Claim Offer Now
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

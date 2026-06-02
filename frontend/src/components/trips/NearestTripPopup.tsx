@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Trip } from '../../data/trips';
 import { tripsData } from '../../data/trips';
 import { getDeadline, Countdown } from './Countdown';
-import { X, Bell } from 'lucide-react';
+import { X, ChevronRight } from 'lucide-react';
 
 export const NearestTripPopup = ({ onTripClick }: { onTripClick: (trip: Trip) => void }) => {
   const [nearestTrip, setNearestTrip] = useState<Trip | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     let closestTrip: Trip | null = null;
@@ -26,47 +27,77 @@ export const NearestTripPopup = ({ onTripClick }: { onTripClick: (trip: Trip) =>
     });
 
     setNearestTrip(closestTrip);
+
+    // Slide in after a short delay so it doesn't compete with page load
+    const timer = setTimeout(() => setIsVisible(true), 3500);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!nearestTrip || !isVisible) return null;
+  if (!nearestTrip) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 animate-in slide-in-from-bottom-5 fade-in duration-500">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 max-w-sm w-full relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1 h-full bg-[#ff385c]" />
-        
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsVisible(false);
-          }}
-          className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 p-1 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors z-10"
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: 80, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.95 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="fixed bottom-5 right-5 z-40 w-[300px]"
         >
-          <X size={16} />
-        </button>
+          <div
+            onClick={() => onTripClick(nearestTrip)}
+            className="relative cursor-pointer rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.25)] ring-1 ring-black/5"
+          >
+            {/* Trip Image */}
+            <div className="h-[120px] relative">
+              <img
+                src={nearestTrip.images[0]}
+                alt={nearestTrip.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shrink-0 text-orange-600 mt-1">
-            <Bell size={20} className="animate-pulse" />
-          </div>
-          
-          <div className="flex-1 min-w-0 pr-4">
-            <h4 className="font-bold text-slate-900 text-sm mb-1">Registration Closing Soon!</h4>
-            <p className="text-slate-500 text-xs mb-2 truncate" title={nearestTrip.title}>
-              {nearestTrip.title}
-            </p>
-            <div className="mb-3 scale-90 origin-left">
-              <Countdown date={nearestTrip.date} />
+              {/* Close button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsVisible(false);
+                }}
+                className="absolute top-2 right-2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white/80 hover:text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+              >
+                <X size={12} />
+              </button>
+
+              {/* Countdown badge on image */}
+              <div className="absolute bottom-2 left-3">
+                <Countdown date={nearestTrip.date} />
+              </div>
             </div>
-            <button 
-              onClick={() => onTripClick(nearestTrip)}
-              className="text-xs font-bold text-[#ff385c] hover:text-[#d90b3e] uppercase tracking-wider"
-            >
-              View Details &rarr;
-            </button>
+
+            {/* Content */}
+            <div className="bg-white px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-orange-600 uppercase tracking-wide mb-0.5">
+                    Closing soon
+                  </p>
+                  <h4 className="font-bold text-slate-900 text-sm truncate">
+                    {nearestTrip.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {nearestTrip.date}
+                  </p>
+                </div>
+                <div className="shrink-0 w-7 h-7 bg-slate-900 rounded-full flex items-center justify-center">
+                  <ChevronRight size={14} className="text-white" />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
+

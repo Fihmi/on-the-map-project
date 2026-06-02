@@ -76,6 +76,13 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
         <div className="p-6 sm:p-8">
           <h2 className="text-3xl font-bold text-slate-900 mb-2">{trip.title}</h2>
           
+          {trip.isCovered && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 font-medium text-sm mb-4 border border-teal-200">
+              <Check size={16} className="text-teal-600" />
+              Covered for On The Map exchange participants
+            </div>
+          )}
+
           <div className="flex items-center space-x-4 text-sm text-slate-600 mb-6">
             <div className="flex items-center font-medium text-slate-900">
               <Star size={16} className="fill-current mr-1" />

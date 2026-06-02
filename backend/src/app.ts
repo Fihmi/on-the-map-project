@@ -13,8 +13,8 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB (Commented out for JSON DB testing)
-// connectDB();
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(helmet());
