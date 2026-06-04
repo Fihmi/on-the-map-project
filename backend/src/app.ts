@@ -18,8 +18,19 @@ connectDB();
 
 // Middleware
 app.use(helmet());
+const allowedOrigins = [
+  'http://localhost:5173', // Vite default port
+  'https://on-the-map-project-rfsm.vercel.app'
+];
+
 app.use(cors({
-  origin: true, // Allow all origins for local development flexibility
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
