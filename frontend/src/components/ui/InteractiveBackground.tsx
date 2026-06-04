@@ -80,7 +80,7 @@ export const InteractiveBackground = () => {
                 width: 800,
                 height: 800,
               },
-              value: 60,
+              value: 15,
             },
             opacity: {
               value: 0.3,
