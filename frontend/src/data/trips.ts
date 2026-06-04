@@ -1,44 +1,44 @@
 // Import images for Trip 1
-import trip1_1 from '../assets/Products/Trip-1/53.jpg';
-import trip1_2 from '../assets/Products/Trip-1/Muse_bardo_tunis.jpg';
-import trip1_3 from '../assets/Products/Trip-1/scale.webp';
-import trip1_4 from '../assets/Products/Trip-1/traditional-rooftop-in-tunis.jpg';
-import trip1_5 from '../assets/Products/Trip-1/av_bourguiba.jpg';
+import trip1_1 from '../assets/Products/Trip-1/T1.jpg';
+import trip1_2 from '../assets/Products/Trip-1/T11.jpg';
+import trip1_3 from '../assets/Products/Trip-1/T111.jpg';
+import trip1_4 from '../assets/Products/Trip-1/T1111.webp';
+import trip1_5 from '../assets/Products/Trip-1/T11111.jpg';
 
 // Import images for Trip 2
-import trip2_1 from '../assets/Products/Trip-2/99.jpg';
-import trip2_2 from '../assets/Products/Trip-2/coast-of-Mahdia.jpg';
-import trip2_3 from '../assets/Products/Trip-2/images.jpg';
-import trip2_4 from '../assets/Products/Trip-2/istockphoto-1220408762-612x612.jpg';
-import trip2_5 from '../assets/Products/Trip-2/ribat_monastir.jpg';
+import trip2_1 from '../assets/Products/Trip-2/T2.jpg';
+import trip2_2 from '../assets/Products/Trip-2/T22.jpg';
+import trip2_3 from '../assets/Products/Trip-2/T222.jpg';
+import trip2_4 from '../assets/Products/Trip-2/T2222.jpg';
+import trip2_5 from '../assets/Products/Trip-2/T22222.jpg';
 
 // Import images for Trip 3
-import trip3_1 from '../assets/Products/Trip-3/469956058_122134759970389559_3631471867594414492_n.jpg';
-import trip3_2 from '../assets/Products/Trip-3/batch_IMG_E0877-1024x575.jpg.webp';
-import trip3_3 from '../assets/Products/Trip-3/lac-majeur-private-beach.jpg';
-import trip3_4 from '../assets/Products/Trip-3/eee.jpg';
-import trip3_5 from '../assets/Products/Trip-3/images.jpg';
+import trip3_1 from '../assets/Products/Trip-3/T3.jpg';
+import trip3_2 from '../assets/Products/Trip-3/T33.webp';
+import trip3_3 from '../assets/Products/Trip-3/T333.jpg';
+import trip3_4 from '../assets/Products/Trip-3/T3333.jpg';
+import trip3_5 from '../assets/Products/Trip-3/T33333.jpg';
 
 // Import images for Trip 4
-import trip4_1 from '../assets/Products/Trip-4/107287902-3118162874907805-3778583752709480598-o.jpg';
-import trip4_2 from '../assets/Products/Trip-4/3cbc3003-580c-4339-b35e-8023904783b6.jpg';
-import trip4_3 from '../assets/Products/Trip-4/Sogno1.jpg';
-import trip4_4 from '../assets/Products/Trip-4/il-sogno-camp-1.jpg';
-import trip4_5 from '../assets/Products/Trip-4/karaoke-camping-correze.jpg';
+import trip4_1 from '../assets/Products/Trip-4/T4.jpg';
+import trip4_2 from '../assets/Products/Trip-4/T44.jpg';
+import trip4_3 from '../assets/Products/Trip-4/T444.jpg';
+import trip4_4 from '../assets/Products/Trip-4/T4444.jpg';
+import trip4_5 from '../assets/Products/Trip-4/T44444.jpg';
 
 // Import images for Trip 5
-import trip5_1 from '../assets/Products/Trip-5/673744990_2484113612037779_5432598887552728799_n.jpg';
-import trip5_2 from '../assets/Products/Trip-5/689083718_1483833363540122_3205337874253366856_n.jpg';
-import trip5_3 from '../assets/Products/Trip-5/705842733_1409550527876454_2179043622010030311_n.jpg';
-import trip5_4 from '../assets/Products/Trip-5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
-import trip5_5 from '../assets/Products/Trip-5/trip5-5.jpg';
+import trip5_1 from '../assets/Products/Trip-5/T5.jpg';
+import trip5_2 from '../assets/Products/Trip-5/T55.jpg';
+import trip5_3 from '../assets/Products/Trip-5/T555.jpg';
+import trip5_4 from '../assets/Products/Trip-5/T5555.jpg';
+import trip5_5 from '../assets/Products/Trip-5/T55555.jpg';
 
 // Import images for Trip Sahara
-import trip6_1 from '../assets/Products/Trip-Sahara/1706527695.jpg'
-import trip6_2 from '../assets/Products/Trip-Sahara/41.jpg'
-import trip6_3 from '../assets/Products/Trip-Sahara/ong-jamal_0.25122700-1777662946.webp'
-import trip6_4 from '../assets/Products/Trip-Sahara/tunisia_oasi_di_montagna_foto_i._fornasiero.jpg'
-import trip6_5 from '../assets/Products/Trip-Sahara/181262381.jpg'
+import trip6_1 from '../assets/Products/Trip-Sahara/T6.jpg'
+import trip6_2 from '../assets/Products/Trip-Sahara/T66.jpg'
+import trip6_3 from '../assets/Products/Trip-Sahara/T666.jpg'
+import trip6_4 from '../assets/Products/Trip-Sahara/T6666.webp'
+import trip6_5 from '../assets/Products/Trip-Sahara/T66666.jpg'
 
 
 export interface Trip {
