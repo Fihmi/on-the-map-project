@@ -55,17 +55,17 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        
+
         {/* Header / Close button */}
         <div className="absolute top-4 right-4 z-10">
-          <button 
+          <button
             onClick={onClose}
             className="p-2 bg-white/80 backdrop-blur-md rounded-full text-slate-900 hover:bg-slate-100 transition-colors shadow-sm"
           >
@@ -75,11 +75,11 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
 
         <div className="p-6 sm:p-8">
           <h2 className="text-3xl font-bold text-slate-900 mb-2">{trip.title}</h2>
-          
+
           {trip.isCovered && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 font-medium text-sm mb-4 border border-teal-200">
               <Check size={16} className="text-teal-600" />
-              Covered for Traveland-TRIPS exchange participants
+              Covered for On The Map exchange participants
             </div>
           )}
 
@@ -157,7 +157,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                   <span className="text-2xl font-bold text-slate-900">€{trip.price}</span>
                   <span className="text-slate-500 text-sm"> / person</span>
                 </div>
-                
+
                 <div className="mb-6 pb-6 border-b border-slate-200">
                   <div className="flex items-center text-slate-700 gap-3">
                     <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
@@ -180,7 +180,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                     </div>
                   </div>
                 </div>
-                
+
                 {submitSuccess ? (
                   <div className="bg-green-50 text-green-700 p-6 rounded-xl text-center border border-green-200">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -188,7 +188,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                     </div>
                     <h4 className="font-bold text-lg mb-2">Reservation Confirmed!</h4>
                     <p className="text-sm mb-4">Thank you for booking. We will contact you shortly with details.</p>
-                    <button 
+                    <button
                       onClick={onClose}
                       className="text-green-700 font-semibold underline text-sm"
                     >
@@ -220,28 +220,28 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
                         <div className="relative">
                           <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input 
+                          <input
                             required
-                            type="text" 
-                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm" 
+                            type="text"
+                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
                             placeholder="John Doe"
                             value={formData.customerName}
-                            onChange={e => setFormData({...formData, customerName: e.target.value})}
+                            onChange={e => setFormData({ ...formData, customerName: e.target.value })}
                           />
                         </div>
                       </div>
-                      
+
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Email</label>
                         <div className="relative">
                           <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input 
+                          <input
                             required
-                            type="email" 
-                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm" 
+                            type="email"
+                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
                             placeholder="john@example.com"
                             value={formData.customerEmail}
-                            onChange={e => setFormData({...formData, customerEmail: e.target.value})}
+                            onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
                           />
                         </div>
                       </div>
@@ -250,13 +250,13 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">WhatsApp Number</label>
                         <div className="relative">
                           <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input 
+                          <input
                             required
-                            type="tel" 
-                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm" 
+                            type="tel"
+                            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
                             placeholder="+216 55 123 456"
                             value={formData.customerPhone}
-                            onChange={e => setFormData({...formData, customerPhone: e.target.value})}
+                            onChange={e => setFormData({ ...formData, customerPhone: e.target.value })}
                           />
                         </div>
                       </div>
@@ -268,7 +268,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                       </div>
                     )}
 
-                    <button 
+                    <button
                       type="submit"
                       disabled={isSubmitting || isClosed}
                       className="w-full flex items-center justify-center bg-[#ff385c] hover:bg-[#d90b3e] disabled:bg-[#ff385c]/70 text-white font-bold py-3.5 rounded-lg transition-colors"
