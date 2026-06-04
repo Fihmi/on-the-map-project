@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, MapPin, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package } from 'lucide-react';
+import { Users, Calendar, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { tripsData } from '../data/trips';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { TripCard } from '../components/trips/TripCard';
@@ -15,7 +15,7 @@ import videoLanding from '../assets/video landing.mp4';
 
 export const LandingPage = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
+
 
   const [showPackForm, setShowPackForm] = useState(false);
   const [packFormData, setPackFormData] = useState({
@@ -33,14 +33,7 @@ export const LandingPage = () => {
     tripsData[2]?.images[0] || '',
   ].filter(Boolean);
 
-  useEffect(() => {
-    if (heroImages.length > 0) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % heroImages.length);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [heroImages.length]);
+
 
   // Framer motion variants
   const fadeUp: Variants = {

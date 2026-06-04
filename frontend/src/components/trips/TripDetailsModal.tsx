@@ -1,5 +1,5 @@
 import type { Trip } from '../../data/trips';
-import { X, Star, MapPin, Check, ArrowRight, Route, Calendar, Users, User, Mail, Phone, Loader2, Clock } from 'lucide-react';
+import { X, Star, MapPin, Check, ArrowRight, Route, Calendar, User, Mail, Phone, Loader2, Clock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../api/client';
 import { Countdown, getDeadline } from './Countdown';
