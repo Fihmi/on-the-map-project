@@ -1,44 +1,44 @@
 // Import images for Trip 1
-import trip1_1 from '../assets/Products/Trip 1/53.jpg';
-import trip1_2 from '../assets/Products/Trip 1/Muse_bardo_tunis.jpg';
-import trip1_3 from '../assets/Products/Trip 1/scale.webp';
-import trip1_4 from '../assets/Products/Trip 1/traditional-rooftop-in-tunis.jpg';
-import trip1_5 from '../assets/Products/Trip 1/av_bourguiba.jpg';
+import trip1_1 from '../assets/Products/Trip-1/53.jpg';
+import trip1_2 from '../assets/Products/Trip-1/Muse_bardo_tunis.jpg';
+import trip1_3 from '../assets/Products/Trip-1/scale.webp';
+import trip1_4 from '../assets/Products/Trip-1/traditional-rooftop-in-tunis.jpg';
+import trip1_5 from '../assets/Products/Trip-1/av_bourguiba.jpg';
 
 // Import images for Trip 2
-import trip2_1 from '../assets/Products/Trip 2/99.jpg';
-import trip2_2 from '../assets/Products/Trip 2/coast-of-Mahdia.jpg';
-import trip2_3 from '../assets/Products/Trip 2/images.jpg';
-import trip2_4 from '../assets/Products/Trip 2/istockphoto-1220408762-612x612.jpg';
-import trip2_5 from '../assets/Products/Trip 2/ribat_monastir.jpg';
+import trip2_1 from '../assets/Products/Trip-2/99.jpg';
+import trip2_2 from '../assets/Products/Trip-2/coast-of-Mahdia.jpg';
+import trip2_3 from '../assets/Products/Trip-2/images.jpg';
+import trip2_4 from '../assets/Products/Trip-2/istockphoto-1220408762-612x612.jpg';
+import trip2_5 from '../assets/Products/Trip-2/ribat_monastir.jpg';
 
 // Import images for Trip 3
-import trip3_1 from '../assets/Products/Trip 3/469956058_122134759970389559_3631471867594414492_n.jpg';
-import trip3_2 from '../assets/Products/Trip 3/batch_IMG_E0877-1024x575.jpg.webp';
-import trip3_3 from '../assets/Products/Trip 3/lac-majeur-private-beach.jpg';
-import trip3_4 from '../assets/Products/Trip 3/eee.jpg';
-import trip3_5 from '../assets/Products/Trip 3/images.jpg';
+import trip3_1 from '../assets/Products/Trip-3/469956058_122134759970389559_3631471867594414492_n.jpg';
+import trip3_2 from '../assets/Products/Trip-3/batch_IMG_E0877-1024x575.jpg.webp';
+import trip3_3 from '../assets/Products/Trip-3/lac-majeur-private-beach.jpg';
+import trip3_4 from '../assets/Products/Trip-3/eee.jpg';
+import trip3_5 from '../assets/Products/Trip-3/images.jpg';
 
 // Import images for Trip 4
-import trip4_1 from '../assets/Products/Trip 4/107287902-3118162874907805-3778583752709480598-o.jpg';
-import trip4_2 from '../assets/Products/Trip 4/3cbc3003-580c-4339-b35e-8023904783b6.jpg';
-import trip4_3 from '../assets/Products/Trip 4/Sogno1.jpg';
-import trip4_4 from '../assets/Products/Trip 4/il-sogno-camp-1.jpg';
-import trip4_5 from '../assets/Products/Trip 4/karaoke-camping-correze.jpg';
+import trip4_1 from '../assets/Products/Trip-4/107287902-3118162874907805-3778583752709480598-o.jpg';
+import trip4_2 from '../assets/Products/Trip-4/3cbc3003-580c-4339-b35e-8023904783b6.jpg';
+import trip4_3 from '../assets/Products/Trip-4/Sogno1.jpg';
+import trip4_4 from '../assets/Products/Trip-4/il-sogno-camp-1.jpg';
+import trip4_5 from '../assets/Products/Trip-4/karaoke-camping-correze.jpg';
 
 // Import images for Trip 5
-import trip5_1 from '../assets/Products/Trip 5/673744990_2484113612037779_5432598887552728799_n.jpg';
-import trip5_2 from '../assets/Products/Trip 5/689083718_1483833363540122_3205337874253366856_n.jpg';
-import trip5_3 from '../assets/Products/Trip 5/705842733_1409550527876454_2179043622010030311_n.jpg';
-import trip5_4 from '../assets/Products/Trip 5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
-import trip5_5 from '../assets/Products/Trip 5/mljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGdHVuNHJlYWwuY29tJTJGd3AtY29udGVudCUyRnVwbG9hZHMlMkYyMDI1JTJGMDIlMkYzMDU2MjA4NThfMTQ4NjM3MTkxMTg2OTQ4OV8zMjQyNjI0Mjk5NzIxMTQxNzMyX24tMS5qcGcmY2FjaGVNYXJrZXI9MTczOTI5OTcwMi0yNzYwNDkmdG9rZW49NjY3N2FmZGE2NTU5NDgyNg.q.jpg';
+import trip5_1 from '../assets/Products/Trip-5/673744990_2484113612037779_5432598887552728799_n.jpg';
+import trip5_2 from '../assets/Products/Trip-5/689083718_1483833363540122_3205337874253366856_n.jpg';
+import trip5_3 from '../assets/Products/Trip-5/705842733_1409550527876454_2179043622010030311_n.jpg';
+import trip5_4 from '../assets/Products/Trip-5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
+import trip5_5 from '../assets/Products/Trip-5/mljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGdHVuNHJlYWwuY29tJTJGd3AtY29udGVudCUyRnVwbG9hZHMlMkYyMDI1JTJGMDIlMkYzMDU2MjA4NThfMTQ4NjM3MTkxMTg2OTQ4OV8zMjQyNjI0Mjk5NzIxMTQxNzMyX24tMS5qcGcmY2FjaGVNYXJrZXI9MTczOTI5OTcwMi0yNzYwNDkmdG9rZW49NjY3N2FmZGE2NTU5NDgyNg.q.jpg';
 
 // Import images for Trip Sahara
-import trip6_1 from '../assets/Products/Trip Sahara/1706527695.jpg'
-import trip6_2 from '../assets/Products/Trip Sahara/41.jpg'
-import trip6_3 from '../assets/Products/Trip Sahara/ong-jamal_0.25122700-1777662946.webp'
-import trip6_4 from '../assets/Products/Trip Sahara/tunisia_oasi_di_montagna_foto_i._fornasiero.jpg'
-import trip6_5 from '../assets/Products/Trip Sahara/181262381.jpg'
+import trip6_1 from '../assets/Products/Trip-Sahara/1706527695.jpg'
+import trip6_2 from '../assets/Products/Trip-Sahara/41.jpg'
+import trip6_3 from '../assets/Products/Trip-Sahara/ong-jamal_0.25122700-1777662946.webp'
+import trip6_4 from '../assets/Products/Trip-Sahara/tunisia_oasi_di_montagna_foto_i._fornasiero.jpg'
+import trip6_5 from '../assets/Products/Trip-Sahara/181262381.jpg'
 
 
 export interface Trip {
