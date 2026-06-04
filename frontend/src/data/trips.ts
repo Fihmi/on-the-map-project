@@ -31,7 +31,7 @@ import trip5_1 from '../assets/Products/Trip-5/673744990_2484113612037779_543259
 import trip5_2 from '../assets/Products/Trip-5/689083718_1483833363540122_3205337874253366856_n.jpg';
 import trip5_3 from '../assets/Products/Trip-5/705842733_1409550527876454_2179043622010030311_n.jpg';
 import trip5_4 from '../assets/Products/Trip-5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
-import trip5_5 from '../assets/Products/Trip-5/mljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGdHVuNHJlYWwuY29tJTJGd3AtY29udGVudCUyRnVwbG9hZHMlMkYyMDI1JTJGMDIlMkYzMDU2MjA4NThfMTQ4NjM3MTkxMTg2OTQ4OV8zMjQyNjI0Mjk5NzIxMTQxNzMyX24tMS5qcGcmY2FjaGVNYXJrZXI9MTczOTI5OTcwMi0yNzYwNDkmdG9rZW49NjY3N2FmZGE2NTU5NDgyNg.q.jpg';
+import trip5_5 from '../assets/Products/Trip-5/trip5-5.jpg';
 
 // Import images for Trip Sahara
 import trip6_1 from '../assets/Products/Trip-Sahara/1706527695.jpg'
