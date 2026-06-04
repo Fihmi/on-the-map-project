@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
@@ -27,11 +27,7 @@ export const LandingPage = () => {
   const [packSubmitSuccess, setPackSubmitSuccess] = useState(false);
   const [packSubmitError, setPackSubmitError] = useState('');
 
-  const heroImages = [
-    tripsData[0]?.images[0] || '',
-    tripsData[1]?.images[0] || '',
-    tripsData[2]?.images[0] || '',
-  ].filter(Boolean);
+
 
 
 
