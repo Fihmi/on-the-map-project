@@ -87,11 +87,12 @@ export const TunisiaMap: React.FC<TunisiaMapProps> = ({ trips, onTripClick }) =>
   };
 
   return (
-    <div className="w-full h-[600px] rounded-2xl overflow-hidden shadow-2xl relative z-10 border-4 border-white group">
+    <div className="w-full h-[400px] md:h-[600px] rounded-2xl overflow-hidden shadow-2xl relative z-10 border-4 border-white group">
       <MapContainer 
         center={[34.0, 9.5]} // Center of Tunisia
         zoom={6} 
         scrollWheelZoom={false}
+        tap={false} // Improves scrolling on mobile devices by not capturing touch events for taps aggressively
         className="w-full h-full z-0"
       >
         {/* Minimalistic tile layer */}

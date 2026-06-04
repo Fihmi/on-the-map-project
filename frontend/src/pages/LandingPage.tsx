@@ -91,7 +91,7 @@ export const LandingPage = () => {
             onClick={() => {
               document.getElementById('destinations')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="px-10 py-5 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-full font-bold text-xl shadow-2xl transition-all flex items-center gap-3 mx-auto border border-orange-400/50"
+            className="px-6 py-4 md:px-10 md:py-5 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-full font-bold text-lg md:text-xl shadow-2xl transition-all flex items-center gap-3 mx-auto border border-orange-400/50"
           >
             <Compass className="w-6 h-6 animate-spin-slow" />
             Browse Trips or Start Exploring
@@ -151,7 +151,7 @@ export const LandingPage = () => {
               Featured Getaways
             </h2>
             <p className="text-xl text-slate-200 max-w-2xl mx-auto drop-shadow-md">
-              Select one of our premium trips below or explore regions on the interactive map.
+              Select one of our premium trips below to start your adventure.
             </p>
           </motion.div>
 
@@ -343,20 +343,20 @@ export const LandingPage = () => {
               onClick={() => window.open('https://www.instagram.com/traveland.tn/', '_blank')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-10 py-5 bg-white text-[#164e63] rounded-full font-bold text-xl shadow-2xl hover:bg-gray-100 transition-colors border-2 border-white"
+              className="px-6 py-4 md:px-10 md:py-5 bg-white text-[#164e63] rounded-full font-bold text-lg md:text-xl shadow-2xl hover:bg-gray-100 transition-colors border-2 border-white"
             >
               Follow @traveland.tn
             </motion.button>
           </motion.div>
 
-          <div className="lg:w-1/2 relative h-[700px] w-full flex justify-center items-center">
+          <div className="lg:w-1/2 relative h-auto lg:h-[700px] w-full flex flex-col lg:block justify-center items-center gap-10 mt-16 lg:mt-0">
             {/* Phone 1: traveland.tn */}
             <motion.div
-              initial={{ opacity: 0, y: 100, rotate: -10 }}
+              initial={{ opacity: 0, y: 100, rotate: -5 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, type: "spring", bounce: 0.4 }}
-              className="absolute z-10 -ml-40 mt-20"
+              className="lg:absolute z-10 lg:-ml-40 lg:mt-20 scale-90 sm:scale-100"
             >
               <InstagramPhone
                 username="traveland.tn"
@@ -370,11 +370,11 @@ export const LandingPage = () => {
             </motion.div>
             {/* Phone 2: igv.hadrumet */}
             <motion.div
-              initial={{ opacity: 0, y: -50, rotate: 10 }}
+              initial={{ opacity: 0, y: -50, rotate: 5 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2, type: "spring", bounce: 0.4 }}
-              className="absolute z-20 ml-40 -mt-20"
+              className="lg:absolute z-20 lg:ml-40 lg:-mt-20 -mt-16 lg:mt-0 scale-90 sm:scale-100"
             >
               <InstagramPhone
                 username="igv.hadrumet"
