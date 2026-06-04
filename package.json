@@ -1,7 +1,7 @@
 {
-  "name": "on-the-map",
+  "name": "traveland-trips",
   "version": "1.0.0",
-  "description": "Full-stack project on the map",
+  "description": "Full-stack project traveland-trips",
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",

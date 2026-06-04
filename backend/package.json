@@ -1,7 +1,7 @@
 {
-  "name": "on-the-map-backend",
+  "name": "traveland-trips-backend",
   "version": "1.0.0",
-  "description": "Backend for on the map project",
+  "description": "Backend for traveland-trips project",
   "main": "src/app.ts",
   "scripts": {
     "start": "node dist/app.js",

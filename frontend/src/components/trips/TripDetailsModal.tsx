@@ -79,7 +79,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
           {trip.isCovered && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 font-medium text-sm mb-4 border border-teal-200">
               <Check size={16} className="text-teal-600" />
-              Covered for On The Map exchange participants
+              Covered for Traveland-TRIPS exchange participants
             </div>
           )}
 

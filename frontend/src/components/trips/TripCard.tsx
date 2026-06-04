@@ -27,7 +27,7 @@ export const TripCard = ({ trip, onClick }: TripCardProps) => {
         )}
         {trip.isCovered && (
           <div className="absolute top-3 right-3 bg-teal-600 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md z-10">
-            On The Map Project Covered
+            Traveland-TRIPS Covered
           </div>
         )}
       </div>
