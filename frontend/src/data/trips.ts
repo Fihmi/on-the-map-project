@@ -33,6 +33,14 @@ import trip5_3 from '../assets/Products/Trip 5/705842733_1409550527876454_217904
 import trip5_4 from '../assets/Products/Trip 5/image_c966b703c7acba60_img68dfbfc6c1400.jpg';
 import trip5_5 from '../assets/Products/Trip 5/mljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGdHVuNHJlYWwuY29tJTJGd3AtY29udGVudCUyRnVwbG9hZHMlMkYyMDI1JTJGMDIlMkYzMDU2MjA4NThfMTQ4NjM3MTkxMTg2OTQ4OV8zMjQyNjI0Mjk5NzIxMTQxNzMyX24tMS5qcGcmY2FjaGVNYXJrZXI9MTczOTI5OTcwMi0yNzYwNDkmdG9rZW49NjY3N2FmZGE2NTU5NDgyNg.q.jpg';
 
+// Import images for Trip Sahara
+import trip6_1 from '../assets/Products/Trip Sahara/1706527695.jpg'
+import trip6_2 from '../assets/Products/Trip Sahara/41.jpg'
+import trip6_3 from '../assets/Products/Trip Sahara/ong-jamal_0.25122700-1777662946.webp'
+import trip6_4 from '../assets/Products/Trip Sahara/tunisia_oasi_di_montagna_foto_i._fornasiero.jpg'
+import trip6_5 from '../assets/Products/Trip Sahara/181262381.jpg'
+
+
 export interface Trip {
   id: string;
   title: string;
@@ -60,7 +68,7 @@ export const tripsData: Trip[] = [
     reviews: 124,
     description: 'Discover the treasures of Tunis through a journey to the iconic Bardo Museum, the historic Medina of Tunis, and the charming village of Sidi Bou Said. Experience Tunisia’s rich heritage, vibrant culture, and stunning Mediterranean views in one unforgettable day.',
     amenities: ['Guided Tour', 'Museum Tickets', 'Lunch Included', 'Transport'],
-    images: [trip1_4, trip1_5, trip1_2, trip1_1, trip1_3],
+    images: [trip1_3, trip1_5, trip1_2, trip1_1, trip1_4],
     coordinates: [36.8065, 10.1815], // Tunis
     isCovered: true,
     circuit: ['Bardo Museum', 'Medina of Tunis', 'Sidi Bou Said'],
@@ -75,7 +83,7 @@ export const tripsData: Trip[] = [
     reviews: 32,
     description: 'Sail away to the breathtaking Kuriat Islands on a relaxing boat tour. Spot dolphins in their natural habitat, enjoy crystal-clear waters, and unwind on a secluded beach paradise far from the crowds for a truly exclusive experience.',
     amenities: ['Transport', 'Boat Tour', 'Lunch Included'],
-    images: [trip5_2, trip5_1, trip5_3, trip5_4, trip5_5],
+    images: [trip3_1, trip3_3, trip3_2, trip3_4, trip3_5],
     coordinates: [33.8076, 10.8451], // Kuriat Island
     isCovered: true,
     circuit: ['Kuriat Island'],
@@ -90,7 +98,7 @@ export const tripsData: Trip[] = [
     reviews: 89,
     description: 'Step back in time as you explore the impressive El Jem Amphitheatre, discover the coastal charm of Mahdia, and visit the historic landmarks of Monastir. This journey combines Tunisia’s rich history, cultural heritage, and beautiful Mediterranean scenery.',
     amenities: ['Guided Tour', 'El Jem Amphitheatre Ticket', 'Lunch Included', 'Transport'],
-    images: [trip2_2, trip2_5, trip2_4, trip2_1, trip2_3],
+    images: [trip2_4, trip2_2, trip2_3, trip2_1, trip2_5],
     coordinates: [35.5047, 11.0622], // Mahdia
     isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
@@ -104,8 +112,8 @@ export const tripsData: Trip[] = [
     rating: 4.8,
     reviews: 156,
     description: 'Experience the magic of the Tunisian Sahara with a journey through Tozeur, the stunning oasis of Chebika, and the famous Ong Jmal. Ride across the golden sand dunes in a thrilling 4x4 adventure and explore iconic filming locations from the legendary Star Wars saga.',
-    amenities: ['4x4 Desert Adventure', 'Star Wars Filming Sites', 'accommodation', 'Lanch included', 'Transport Confortable'],
-    images: [trip4_1, trip4_2, trip4_3, trip4_4, trip4_5],
+    amenities: ['4x4 Desert Adventure', 'Star Wars Filming Sites', 'Hotel', 'Lanch included', 'Transport Confortable'],
+    images: [trip6_1, trip6_2, trip6_3, trip6_4, trip6_5],
     coordinates: [33.4550, 9.0253],
     circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
     date: 'July 22 & 23, 2026'
@@ -119,7 +127,8 @@ export const tripsData: Trip[] = [
     reviews: 56,
     description: 'Embark on an exciting adventure to Cap Serrat, one of Tunisia’s most breathtaking natural gems. Enjoy a thrilling 4x4 experience through scenic trails, discover unspoiled landscapes, and take in spectacular views of the Mediterranean coastline.',
     amenities: ['Private beach', 'Boat & 4x4 Tour', 'Lunch Included', 'Transport'],
-    images: [trip3_3, trip3_1, trip3_2, trip3_4, trip3_5],
+    images: [trip5_2, trip5_1, trip5_3, trip5_4, trip5_5],
+
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
     date: 'July 26, 2026'

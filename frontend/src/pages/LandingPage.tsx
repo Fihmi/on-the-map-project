@@ -6,7 +6,7 @@ import { TripCard } from '../components/trips/TripCard';
 import { TripDetailsModal } from '../components/trips/TripDetailsModal';
 import { NearestTripPopup } from '../components/trips/NearestTripPopup';
 import { InstagramPhone } from '../components/ui/InstagramPhone';
-import { AdPopup } from '../components/ui/AdPopup';
+// import { AdPopup } from '../components/ui/AdPopup'; // Ad popup removed
 import { tripsData } from '../data/trips';
 import type { Trip } from '../data/trips';
 import { Map, Compass, Camera, User, Mail, Phone, Check, Loader2 } from 'lucide-react';
@@ -208,7 +208,7 @@ export const LandingPage = () => {
                 <div className="md:w-1/3 flex flex-col items-center">
                   <div className="bg-white text-slate-900 rounded-2xl p-6 text-center shadow-xl transform rotate-2 w-full max-w-sm">
                     <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Package</div>
-                    
+
                     <div className="flex flex-col items-center mb-4">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg font-bold text-slate-400 line-through">€160</span>
@@ -227,7 +227,7 @@ export const LandingPage = () => {
                         </div>
                         <h4 className="font-bold text-base mb-1">Reservation Confirmed!</h4>
                         <p className="text-xs mb-3">Thank you for booking. We will contact you shortly.</p>
-                        <button 
+                        <button
                           onClick={() => setPackSubmitSuccess(false)}
                           className="text-green-700 font-semibold underline text-xs"
                         >
@@ -257,35 +257,35 @@ export const LandingPage = () => {
                         <div className="space-y-2 mb-3">
                           <div className="relative">
                             <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
+                            <input
                               required
-                              type="text" 
-                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              type="text"
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                               placeholder="Full Name"
                               value={packFormData.customerName}
-                              onChange={e => setPackFormData({...packFormData, customerName: e.target.value})}
+                              onChange={e => setPackFormData({ ...packFormData, customerName: e.target.value })}
                             />
                           </div>
                           <div className="relative">
                             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
+                            <input
                               required
-                              type="email" 
-                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              type="email"
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                               placeholder="Email Address"
                               value={packFormData.customerEmail}
-                              onChange={e => setPackFormData({...packFormData, customerEmail: e.target.value})}
+                              onChange={e => setPackFormData({ ...packFormData, customerEmail: e.target.value })}
                             />
                           </div>
                           <div className="relative">
                             <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
+                            <input
                               required
-                              type="tel" 
-                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" 
+                              type="tel"
+                              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                               placeholder="WhatsApp Number"
                               value={packFormData.customerPhone}
-                              onChange={e => setPackFormData({...packFormData, customerPhone: e.target.value})}
+                              onChange={e => setPackFormData({ ...packFormData, customerPhone: e.target.value })}
                             />
                           </div>
                         </div>
@@ -296,7 +296,7 @@ export const LandingPage = () => {
                           </div>
                         )}
 
-                        <button 
+                        <button
                           type="submit"
                           disabled={isPackSubmitting}
                           className="w-full py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md"
@@ -347,14 +347,15 @@ export const LandingPage = () => {
               Share the Beauty of Tunisia
             </h2>
             <p className="text-2xl text-cyan-50 mb-10 leading-relaxed font-light drop-shadow-md">
-              Join our community of travelers. Tag your amazing experiences with <strong className="font-bold">#DiscoverTunisia</strong> to be featured on our official Instagram page!
+              Join our community of travelers. Tag your amazing experiences with <strong className="font-bold">#TravelandTN</strong> to be featured on our official Instagram page!
             </p>
             <motion.button
+              onClick={() => window.open('https://www.instagram.com/traveland.tn/', '_blank')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-10 py-5 bg-white text-[#164e63] rounded-full font-bold text-xl shadow-2xl hover:bg-gray-100 transition-colors border-2 border-white"
             >
-              Follow @DiscoverTunisia
+              Follow @traveland.tn
             </motion.button>
           </motion.div>
 
@@ -370,9 +371,10 @@ export const LandingPage = () => {
               <InstagramPhone
                 username="traveland.tn"
                 location="Tunisia"
-                imageUrl={tripsData[0]?.images[1] || ''}
+                imageUrl="/images/Post - traveland.png"
                 likes={3412}
                 caption=" 🌴 Explore the beauty of Tunisia with us! From the historic medinas to the golden beaches, we bring you the best deals and unforgettable experiences. #TravelandTN #TunisiaTravel"
+                avatarUrl="/images/insta icon - traveland.jpeg"
                 delay="0s"
               />
             </motion.div>
@@ -387,9 +389,10 @@ export const LandingPage = () => {
               <InstagramPhone
                 username="igv.hadrumet"
                 location="Sousse, Tunisia"
-                imageUrl={tripsData[2]?.images[0] || ''}
+                imageUrl="/images/Post - igv.jpg"
                 likes={5821}
                 caption=" 🌊 Feel the Mediterranean breeze at IGV Hadrumet. Your perfect getaway starts here. Book your relaxing coastal retreat today! #IGVHadrumet #Sousse #Tunisia"
+                avatarUrl="/images/insta icon - igv.jpeg"
                 delay="-3s"
               />
             </motion.div>
@@ -407,7 +410,8 @@ export const LandingPage = () => {
             <Map className="w-8 h-8 hover:text-orange-500 transition-colors" />
           </motion.div>
         </div>
-        <p className="text-lg">&copy; {new Date().getFullYear()} Discover Tunisia. All rights reserved.</p>
+        <h2>AIESEC Hadrumet & Traveland are delighted to welcome you to Tunisia. Explore boldly, connect deeply, and let every journey become a story worth telling. ✨</h2>
+        <p className="text-lg">&copy; {new Date().getFullYear()} traveland.tn — All rights reserved.</p>
       </footer>
 
       {/* Trip Details Modal */}
@@ -419,8 +423,7 @@ export const LandingPage = () => {
       {/* Nearest Trip Popup */}
       <NearestTripPopup onTripClick={(trip) => setSelectedTrip(trip)} />
 
-      {/* Limited Offer Ad */}
-      <AdPopup />
+     
     </div>
   );
 };
