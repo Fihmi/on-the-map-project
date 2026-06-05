@@ -123,13 +123,7 @@ export const Preloader = ({ images, onComplete }: PreloaderProps) => {
           </div>
         </div>
 
-        {/* Website Title */}
-        <h2 className="text-3xl font-black tracking-widest text-white uppercase mb-2">
-          Traveland<span className="text-orange-500">.tn</span>
-        </h2>
-        <p className="text-slate-400 text-xs font-semibold tracking-widest uppercase mb-8">
-          AIESEC HADRUMET
-        </p>
+
 
         {/* Dynamic Traveling Message */}
         <div className="h-12 flex items-center justify-center mb-6">
