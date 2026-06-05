@@ -67,6 +67,7 @@ export const LandingPage = () => {
             loop
             muted
             playsInline
+            preload="none"
             poster="https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=1920&q=80"
             src={videoLanding}
             className="w-full h-full object-cover"
@@ -321,23 +322,23 @@ export const LandingPage = () => {
         {/* Subtle glass background for the whole section */}
         <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xl border-y border-white/5"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="lg:w-1/2"
+            className="min-w-0"
           >
             <div className="flex items-center gap-3 mb-6">
               <Camera className="w-10 h-10 text-[#f3e5ab]" />
               <span className="text-xl font-bold text-[#f3e5ab] tracking-widest uppercase drop-shadow-md">Social Media</span>
             </div>
-            <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-tight drop-shadow-xl">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-8 leading-tight drop-shadow-xl">
               Share the Beauty of Tunisia
             </h2>
-            <p className="text-2xl text-cyan-50 mb-10 leading-relaxed font-light drop-shadow-md">
-              Join our community of travelers. Tag your amazing experiences with <strong className="font-bold">#TravelandTN</strong> to be featured on our official Instagram page!
+            <p className="text-lg md:text-xl text-cyan-50 mb-12 leading-relaxed font-light drop-shadow-md break-words">
+              Join our community. Tag your amazing experiences with <strong className="font-bold">#TravelandTN</strong> to be featured on our official Instagram page!
             </p>
             <motion.button
               onClick={() => window.open('https://www.instagram.com/traveland.tn/', '_blank')}
@@ -349,14 +350,14 @@ export const LandingPage = () => {
             </motion.button>
           </motion.div>
 
-          <div className="lg:w-1/2 relative h-auto lg:h-[700px] w-full flex flex-col lg:block justify-center items-center gap-10 mt-16 lg:mt-0">
-            {/* Phone 1: traveland.tn */}
+          <div className="relative h-[700px] w-full overflow-hidden mt-16 lg:mt-0">
+            {/* Phone 1: traveland.tn — upper left */}
             <motion.div
               initial={{ opacity: 0, y: 100, rotate: -5 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, type: "spring", bounce: 0.4 }}
-              className="lg:absolute z-10 lg:-ml-40 lg:mt-20 scale-90 sm:scale-100"
+              className="absolute top-4 left-0 z-10 scale-90 origin-top-left"
             >
               <InstagramPhone
                 username="traveland.tn"
@@ -368,13 +369,13 @@ export const LandingPage = () => {
                 delay="0s"
               />
             </motion.div>
-            {/* Phone 2: igv.hadrumet */}
+            {/* Phone 2: igv.hadrumet — lower right */}
             <motion.div
               initial={{ opacity: 0, y: -50, rotate: 5 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2, type: "spring", bounce: 0.4 }}
-              className="lg:absolute z-20 lg:ml-40 lg:-mt-20 -mt-16 lg:mt-0 scale-90 sm:scale-100"
+              className="absolute bottom-4 right-0 z-20 scale-90 origin-bottom-right"
             >
               <InstagramPhone
                 username="igv.hadrumet"
@@ -414,6 +415,6 @@ export const LandingPage = () => {
       <NearestTripPopup onTripClick={(trip) => setSelectedTrip(trip)} />
 
 
-    </div>
+    </div >
   );
 };

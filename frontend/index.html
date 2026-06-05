@@ -3,15 +3,52 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/images/icon-sast.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Traveland-Trips</title>
+  <meta name="description" content="Discover the magic of Tunisia with Traveland-Trips. Explore curated travel packages to ancient medinas, Mediterranean beaches, and the Sahara desert." />
+  <meta name="theme-color" content="#0a0f1c" />
+  <title>Traveland-Trips — Explore Tunisia</title>
+  <link rel="icon" type="image/png" href="/images/icon-sast.png" />
 
-  <!-- Preload Critical Resources -->
-  <link rel="modulepreload" href="/src/main.tsx" />
-  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=1920&q=80" />
+  <!--
+    ┌─ PRECONNECT ──────────────────────────────────────────────────────────────┐
+    │ Opens the TCP+TLS handshake to every third-party origin we fetch from     │
+    │ during the page lifetime so the sockets are warm before the JS runs.      │
+    │ dns-prefetch is the graceful fallback for browsers that ignore preconnect.│
+    └───────────────────────────────────────────────────────────────────────────┘
+  -->
+  <!-- Unsplash — hero poster, decorative background images -->
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
+  <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
-  <!-- Critical CSS to avoid flash of unstyled content (FOUC) and style raw body -->
+  <!-- CartoCDN — Leaflet tile layer (four subdomains: a/b/c/d) -->
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin="anonymous" />
+  <link rel="dns-prefetch" href="https://basemaps.cartocdn.com" />
+
+  <!--
+    ┌─ PRELOAD ─────────────────────────────────────────────────────────────────┐
+    │ Kicks off fetches for LCP / above-the-fold assets at the highest browser  │
+    │ priority, before the parser even reaches the <body>.                      │
+    └───────────────────────────────────────────────────────────────────────────┘
+  -->
+  <!-- Hero video poster — shown immediately while the video loads -->
+  <link rel="preload" as="image"
+        href="https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=1920&q=80"
+        crossorigin="anonymous" />
+
+  <!-- Favicon — small; preloading avoids a separate late-stage DNS lookup -->
+  <link rel="preload" as="image" href="/images/icon-sast.png" />
+
+  <!--
+    ┌─ PREFETCH ────────────────────────────────────────────────────────────────┐
+    │ Tunisia GeoJSON is not needed on first paint but is fetched the moment    │
+    │ the map component mounts. Prefetching it during idle time eliminates the  │
+    │ round-trip latency that would otherwise delay the overlay rendering.      │
+    └───────────────────────────────────────────────────────────────────────────┘
+  -->
+  <link rel="prefetch" href="/tunisia.json" as="fetch" crossorigin="anonymous" />
+
+  <!-- Critical CSS: prevents FOUC and provides the dark base shell + loading spinner
+       before the JS bundle and Tailwind styles have loaded -->
   <style>
     html, body {
       background-color: #0a0f1c;
@@ -42,7 +79,11 @@
 
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.tsx" async></script>
+  <!--
+    ES module scripts are deferred by spec — the `async` attribute has no effect
+    on type="module" and has been removed to avoid confusion.
+  -->
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>

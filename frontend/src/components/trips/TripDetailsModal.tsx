@@ -1,6 +1,6 @@
 import type { Trip } from '../../data/trips';
 import { X, Star, MapPin, Check, ArrowRight, Route, Calendar, User, Mail, Phone, Loader2, Clock } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '../../api/client';
 import { Countdown, getDeadline } from './Countdown';
 
@@ -19,8 +19,13 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  const deadline = getDeadline(trip?.date);
-  const [isClosed, setIsClosed] = useState(deadline ? deadline.getTime() <= new Date().getTime() : false);
+  // useMemo gives a stable Date reference — without it, getDeadline() returns a
+  // brand-new Date object every render, which causes the setInterval below to be
+  // torn down and re-created on every parent re-render (wasted timer allocation).
+  const deadline = useMemo(() => getDeadline(trip?.date), [trip?.date]);
+  const [isClosed, setIsClosed] = useState(() =>
+    deadline ? deadline.getTime() <= Date.now() : false
+  );
 
   useEffect(() => {
     if (trip) {
@@ -32,21 +37,26 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
 
   useEffect(() => {
     if (!deadline) return;
+    // deadline is now a stable memoized reference — this interval is only
+    // recreated when the actual trip date changes, not on every re-render.
     const timer = setInterval(() => {
-      setIsClosed(deadline.getTime() <= new Date().getTime());
+      setIsClosed(deadline.getTime() <= Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, [deadline]);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open.
+  // Uses classList.add/remove instead of direct style.overflow mutation:
+  // inline style writes on <body> force an immediate style recalculation;
+  // class-based toggling lets the browser batch it with the next style flush.
   useEffect(() => {
     if (trip) {
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('overflow-hidden');
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.classList.remove('overflow-hidden');
     }
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.classList.remove('overflow-hidden');
     };
   }, [trip]);
 

@@ -30,7 +30,7 @@ export const InteractiveBackground = () => {
               value: "transparent",
             },
           },
-          fpsLimit: 120,
+          fpsLimit: 60,
           interactivity: {
             events: {
               onClick: {

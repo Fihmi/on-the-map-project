@@ -32,21 +32,34 @@ export const AdminPage = () => {
   });
 
   useEffect(() => {
-    fetchReservations();
-  }, []);
+    // AbortController lets us cancel the in-flight request when the admin
+    // navigates away, preventing a setState call on an unmounted component.
+    const controller = new AbortController();
 
-  const fetchReservations = async () => {
-    try {
-      const response = await apiClient.get('/reservations');
-      setReservations(response.data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching reservations:', err);
-      setError('Failed to load reservations.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchReservations = async () => {
+      try {
+        const response = await apiClient.get('/reservations', {
+          signal: controller.signal,
+        });
+        setReservations(response.data);
+        setError(null);
+      } catch (err: any) {
+        // axios wraps AbortError as a CanceledError — ignore it on unmount
+        if (err?.code !== 'ERR_CANCELED') {
+          console.error('Error fetching reservations:', err);
+          setError('Failed to load reservations.');
+        }
+      } finally {
+        // Only clear the spinner when the request actually resolved/rejected
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchReservations();
+    return () => controller.abort();
+  }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
