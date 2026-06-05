@@ -157,7 +157,7 @@ export const AdminPage = () => {
             >
               <div className="h-40 overflow-hidden relative">
                 <div className="absolute inset-0 bg-slate-900/20 z-10 group-hover:bg-transparent transition-colors"></div>
-                <img src={trip.images[0]} alt={trip.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <img src={trip.images[0]} alt={trip.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-slate-900 mb-2">{trip.title}</h3>
@@ -225,7 +225,7 @@ export const AdminPage = () => {
             <div className="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <div className="flex items-center gap-6">
                 <div className="h-20 w-20 rounded-xl overflow-hidden shrink-0">
-                  <img src={trip?.images[0]} alt={trip?.title} className="w-full h-full object-cover" />
+                  <img src={trip?.images[0]} alt={trip?.title} className="w-full h-full object-cover" loading="lazy" />
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold text-slate-900">{trip?.title}</h2>

@@ -33,7 +33,7 @@ export const InstagramPhone = ({
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
+            <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover" loading="lazy" />
             <div className="flex flex-col">
               <span className="text-sm font-bold leading-tight">{username}</span>
               <span className="text-xs text-gray-500 leading-tight">{location}</span>
@@ -44,7 +44,7 @@ export const InstagramPhone = ({
 
         {/* Post Image */}
         <div className="w-full h-[300px] bg-gray-100">
-          <img src={imageUrl} alt="Post content" className="w-full h-full object-cover" />
+          <img src={imageUrl} alt="Post content" className="w-full h-full object-cover" loading="lazy" />
         </div>
 
         {/* Action Bar */}

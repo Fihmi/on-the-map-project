@@ -92,7 +92,6 @@ export const TunisiaMap: React.FC<TunisiaMapProps> = ({ trips, onTripClick }) =>
         center={[34.0, 9.5]} // Center of Tunisia
         zoom={6} 
         scrollWheelZoom={false}
-        tap={false} // Improves scrolling on mobile devices by not capturing touch events for taps aggressively
         className="w-full h-full z-0"
       >
         {/* Minimalistic tile layer */}
@@ -126,6 +125,7 @@ export const TunisiaMap: React.FC<TunisiaMapProps> = ({ trips, onTripClick }) =>
                       src={trip.images[0]} 
                       alt={trip.title} 
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   <h3 className="font-bold text-slate-800 text-sm leading-tight mb-1">{trip.title}</h3>

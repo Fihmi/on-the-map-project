@@ -11,7 +11,7 @@ import { tripsData } from '../data/trips';
 import type { Trip } from '../data/trips';
 import { Map, Compass, Camera, User, Mail, Phone, Check, Loader2 } from 'lucide-react';
 import { apiClient } from '../api/client';
-import videoLanding from '../assets/video landing.mp4';
+import videoLanding from '../assets/video landing.mov';
 
 export const LandingPage = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
@@ -413,7 +413,7 @@ export const LandingPage = () => {
       {/* Nearest Trip Popup */}
       <NearestTripPopup onTripClick={(trip) => setSelectedTrip(trip)} />
 
-     
+
     </div>
   );
 };

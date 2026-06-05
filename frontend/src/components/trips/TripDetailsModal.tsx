@@ -98,11 +98,11 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
           {/* Image Gallery Grid */}
           <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[400px] mb-8 rounded-xl overflow-hidden">
             <div className="col-span-2 row-span-2 relative group">
-              <img src={trip.images[0]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Main view" />
+              <img src={trip.images[0]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Main view" loading="lazy" />
             </div>
             {trip.images.slice(1, 5).map((img, idx) => (
               <div key={idx} className="relative group overflow-hidden">
-                <img src={img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={`View ${idx + 2}`} />
+                <img src={img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={`View ${idx + 2}`} loading="lazy" />
                 {idx === 3 && trip.images.length > 5 && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer hover:bg-black/50 transition-colors">
                     <span className="text-white font-medium text-lg">+{trip.images.length - 5} photos</span>
