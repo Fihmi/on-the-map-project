@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package } from 'lucide-react';
+import { Users, Calendar, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package, Lock, Eye, EyeOff } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { tripsData } from '../data/trips';
 
@@ -18,6 +18,15 @@ interface Reservation {
 
 export const AdminPage = () => {
   const navigate = useNavigate();
+  
+  // Password Authentication States
+  const [password, setPassword] = useState(() => sessionStorage.getItem('adminPassword') || '');
+  const [isAuthorized, setIsAuthorized] = useState(() => !!sessionStorage.getItem('adminPassword'));
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,14 +41,20 @@ export const AdminPage = () => {
   });
 
   useEffect(() => {
+    if (!isAuthorized) return;
+    
     // AbortController lets us cancel the in-flight request when the admin
     // navigates away, preventing a setState call on an unmounted component.
     const controller = new AbortController();
 
     const fetchReservations = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.get('/reservations', {
           signal: controller.signal,
+          headers: {
+            'X-Admin-Password': password
+          }
         });
         setReservations(response.data);
         setError(null);
@@ -47,7 +62,13 @@ export const AdminPage = () => {
         // axios wraps AbortError as a CanceledError — ignore it on unmount
         if (err?.code !== 'ERR_CANCELED') {
           console.error('Error fetching reservations:', err);
-          setError('Failed to load reservations.');
+          if (err.response?.status === 401) {
+            sessionStorage.removeItem('adminPassword');
+            setIsAuthorized(false);
+            setLoginError('Session expired. Please log in again.');
+          } else {
+            setError('Failed to load reservations.');
+          }
         }
       } finally {
         // Only clear the spinner when the request actually resolved/rejected
@@ -59,26 +80,73 @@ export const AdminPage = () => {
 
     fetchReservations();
     return () => controller.abort();
-  }, []);
+  }, [isAuthorized, password]);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordInput.trim()) {
+      setLoginError('Password is required.');
+      return;
+    }
+
+    setVerifying(true);
+    setLoginError(null);
+    try {
+      await apiClient.get('/reservations', {
+        headers: {
+          'X-Admin-Password': passwordInput
+        }
+      });
+      sessionStorage.setItem('adminPassword', passwordInput);
+      setPassword(passwordInput);
+      setIsAuthorized(true);
+      setLoginError(null);
+    } catch (err: any) {
+      console.error('Admin verification error:', err);
+      if (err.response?.status === 401) {
+        setLoginError('Incorrect password.');
+      } else {
+        setLoginError('Could not verify credentials. Check server connection.');
+      }
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
-      await apiClient.put(`/reservations/${id}/status`, { status: newStatus });
+      await apiClient.put(`/reservations/${id}/status`, { status: newStatus }, {
+        headers: { 'X-Admin-Password': password }
+      });
       setReservations(prev => prev.map(r => r._id === id ? { ...r, status: newStatus } : r));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating status:', err);
-      alert('Failed to update status.');
+      if (err.response?.status === 401) {
+        sessionStorage.removeItem('adminPassword');
+        setIsAuthorized(false);
+        setLoginError('Session expired. Please log in again.');
+      } else {
+        alert('Failed to update status.');
+      }
     }
   };
 
   const deleteReservation = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this reservation?')) return;
     try {
-      await apiClient.delete(`/reservations/${id}`);
+      await apiClient.delete(`/reservations/${id}`, {
+        headers: { 'X-Admin-Password': password }
+      });
       setReservations(prev => prev.filter(r => r._id !== id));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting reservation:', err);
-      alert('Failed to delete reservation.');
+      if (err.response?.status === 401) {
+        sessionStorage.removeItem('adminPassword');
+        setIsAuthorized(false);
+        setLoginError('Session expired. Please log in again.');
+      } else {
+        alert('Failed to delete reservation.');
+      }
     }
   };
 
@@ -99,22 +167,32 @@ export const AdminPage = () => {
         customerName: newClientData.customerName,
         customerEmail: newClientData.customerEmail,
         customerPhone: newClientData.customerPhone
+      }, {
+        headers: { 'X-Admin-Password': password }
       });
 
       // The backend creates it with default status. We update it if it's different.
       let createdReservation = response.data.reservation;
       
       if (newClientData.status !== createdReservation.status) {
-         await apiClient.put(`/reservations/${createdReservation._id}/status`, { status: newClientData.status });
+         await apiClient.put(`/reservations/${createdReservation._id}/status`, { status: newClientData.status }, {
+           headers: { 'X-Admin-Password': password }
+         });
          createdReservation.status = newClientData.status;
       }
 
       setReservations(prev => [createdReservation, ...prev]);
       setIsAddModalOpen(false);
       setNewClientData({ customerName: '', customerEmail: '', customerPhone: '', status: 'Not Paid' });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding client:', err);
-      alert('Failed to add client.');
+      if (err.response?.status === 401) {
+        sessionStorage.removeItem('adminPassword');
+        setIsAuthorized(false);
+        setLoginError('Session expired. Please log in again.');
+      } else {
+        alert('Failed to add client.');
+      }
     }
   };
 
@@ -403,8 +481,76 @@ export const AdminPage = () => {
     );
   };
 
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl text-white max-w-md w-full relative z-20 animate-in fade-in zoom-in-95 duration-300">
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 bg-teal-500/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-teal-500/30 mb-4 shadow-[0_0_20px_rgba(20,184,166,0.3)]">
+              <Lock className="w-8 h-8 text-teal-400" />
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white mb-2">Admin Portal</h2>
+            <p className="text-slate-400 text-sm">Please enter the administrator password to view reservations and dashboard analytics.</p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 pr-10 transition-all"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {loginError && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-sm text-red-400 flex items-center gap-2 animate-pulse">
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0"></div>
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={verifying}
+              className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-teal-600 hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {verifying ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                'Access Dashboard'
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-slate-800 text-center">
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center text-slate-400 hover:text-white text-sm font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to public site
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 animate-in fade-in duration-300">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -415,13 +561,23 @@ export const AdminPage = () => {
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Admin Dashboard</h1>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/')}
               className="flex items-center space-x-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             >
               <Home className="h-4 w-4" />
               <span>Back to Home</span>
+            </button>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('adminPassword');
+                setPassword('');
+                setIsAuthorized(false);
+              }}
+              className="flex items-center space-x-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
+            >
+              <span>Logout</span>
             </button>
           </div>
         </div>
@@ -446,3 +602,4 @@ export const AdminPage = () => {
     </div>
   );
 };
+

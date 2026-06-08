@@ -20,7 +20,9 @@ connectDB();
 app.use(helmet());
 const allowedOrigins = [
   'http://localhost:5173', // Vite default port
-  'https://on-the-map-project-rfsm.vercel.app'
+  'http://localhost:5174',
+  'https://traveland-trips.vercel.app', // New Vercel deployment
+  ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
 ];
 
 app.use(cors({
