@@ -6,9 +6,8 @@ export interface IReservation extends Document {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  guests: number;
-  date: Date;
-  status: 'Pending' | 'Confirmed' | 'Cancelled';
+  date: string;
+  status: 'Not Paid' | 'Pending' | 'Paid';
 }
 
 const reservationSchema = new Schema<IReservation>(
@@ -16,14 +15,13 @@ const reservationSchema = new Schema<IReservation>(
     tripId: { type: String, required: true },
     tripName: { type: String, required: true },
     customerName: { type: String, required: true },
-    customerEmail: { type: String, required: true },
+    customerEmail: { type: String, default: 'N/A' },
     customerPhone: { type: String, required: true },
-    guests: { type: Number, required: true, min: 1 },
-    date: { type: Date, required: true },
+    date: { type: String, required: true },
     status: {
       type: String,
-      enum: ['Pending', 'Confirmed', 'Cancelled'],
-      default: 'Pending',
+      enum: ['Not Paid', 'Pending', 'Paid'],
+      default: 'Not Paid',
     },
   },
   {

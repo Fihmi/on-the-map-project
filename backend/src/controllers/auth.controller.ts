@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-// import { User } from '../models/user.model';
-import { readDB, writeDB, UserDB } from '../utils/jsonDb';
+import { User } from '../models/user.model';
 
 const generateTokens = (userId: string) => {
   const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: '15m' });
@@ -14,8 +13,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   try {
     const { name, email, password } = req.body;
 
-    const db = readDB();
-    const existingUser = db.users.find(u => u.email === email);
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       res.status(400).json({ success: false, message: 'User already exists' });
       return;
@@ -24,26 +22,24 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const newUser: UserDB = {
-      _id: Date.now().toString(),
+    const { accessToken, refreshToken } = generateTokens(Date.now().toString());
+
+    const newUser = await User.create({
       name,
       email,
       passwordHash,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      refreshToken,
+    });
 
-    const { accessToken, refreshToken } = generateTokens(newUser._id);
-    newUser.refreshToken = refreshToken;
+    const tokens = generateTokens(newUser._id.toString());
+    newUser.refreshToken = tokens.refreshToken;
+    await newUser.save();
 
-    db.users.push(newUser);
-    writeDB(db);
-
-    res.cookie('jwt', refreshToken, {
+    res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-      sameSite: 'strict', // Prevent CSRF attacks
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -52,7 +48,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        accessToken,
+        accessToken: tokens.accessToken,
       },
     });
   } catch (error) {
@@ -64,8 +60,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password } = req.body;
 
-    const db = readDB();
-    const user = db.users.find(u => u.email === email);
+    const user = await User.findOne({ email });
     if (!user) {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
       return;
@@ -77,11 +72,10 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       return;
     }
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user._id.toString());
 
     user.refreshToken = refreshToken;
-    user.updatedAt = new Date().toISOString();
-    writeDB(db);
+    await user.save();
 
     res.cookie('jwt', refreshToken, {
       httpOnly: true,
@@ -114,20 +108,18 @@ export const refresh = async (req: Request, res: Response, next: NextFunction): 
 
     try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: string };
-      
-      const db = readDB();
-      const user = db.users.find(u => u._id === decoded.userId);
+
+      const user = await User.findById(decoded.userId);
 
       if (!user || user.refreshToken !== refreshToken) {
         res.status(401).json({ success: false, message: 'Not authorized, invalid refresh token' });
         return;
       }
 
-      const tokens = generateTokens(user._id);
+      const tokens = generateTokens(user._id.toString());
 
       user.refreshToken = tokens.refreshToken;
-      user.updatedAt = new Date().toISOString();
-      writeDB(db);
+      await user.save();
 
       res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true,
@@ -152,12 +144,10 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
   try {
     const refreshToken = req.cookies.jwt;
     if (refreshToken) {
-      const db = readDB();
-      const user = db.users.find(u => u.refreshToken === refreshToken);
+      const user = await User.findOne({ refreshToken });
       if (user) {
         user.refreshToken = '';
-        user.updatedAt = new Date().toISOString();
-        writeDB(db);
+        await user.save();
       }
     }
 

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-// import { Reservation } from '../models/reservation.model';
-import { readDB, writeDB, ReservationDB } from '../utils/jsonDb';
+import { Reservation } from '../models/reservation.model';
 
 export const createReservation = async (req: Request, res: Response) => {
   try {
@@ -10,10 +9,7 @@ export const createReservation = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    const db = readDB();
-
-    const reservation: ReservationDB = {
-      _id: Date.now().toString(),
+    const reservation = await Reservation.create({
       tripId,
       tripName,
       customerName,
@@ -21,12 +17,7 @@ export const createReservation = async (req: Request, res: Response) => {
       customerPhone,
       date,
       status: 'Not Paid',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    db.reservations.push(reservation);
-    writeDB(db);
+    });
 
     res.status(201).json({ message: 'Reservation created successfully', reservation });
   } catch (error) {
@@ -37,8 +28,7 @@ export const createReservation = async (req: Request, res: Response) => {
 
 export const getReservations = async (req: Request, res: Response) => {
   try {
-    const db = readDB();
-    const reservations = db.reservations.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const reservations = await Reservation.find().sort({ createdAt: -1 });
     res.status(200).json(reservations);
   } catch (error) {
     console.error('Error fetching reservations:', error);
@@ -55,18 +45,17 @@ export const updateReservationStatus = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Status is required.' });
     }
 
-    const db = readDB();
-    const reservationIndex = db.reservations.findIndex(r => r._id === id);
+    const reservation = await Reservation.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
 
-    if (reservationIndex === -1) {
+    if (!reservation) {
       return res.status(404).json({ message: 'Reservation not found.' });
     }
 
-    db.reservations[reservationIndex].status = status;
-    db.reservations[reservationIndex].updatedAt = new Date().toISOString();
-    writeDB(db);
-
-    res.status(200).json({ message: 'Reservation status updated successfully', reservation: db.reservations[reservationIndex] });
+    res.status(200).json({ message: 'Reservation status updated successfully', reservation });
   } catch (error) {
     console.error('Error updating reservation status:', error);
     res.status(500).json({ message: 'Server error updating reservation status.' });
@@ -77,15 +66,11 @@ export const deleteReservation = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const db = readDB();
-    const reservationIndex = db.reservations.findIndex(r => r._id === id);
+    const reservation = await Reservation.findByIdAndDelete(id);
 
-    if (reservationIndex === -1) {
+    if (!reservation) {
       return res.status(404).json({ message: 'Reservation not found.' });
     }
-
-    db.reservations.splice(reservationIndex, 1);
-    writeDB(db);
 
     res.status(200).json({ message: 'Reservation deleted successfully' });
   } catch (error) {
