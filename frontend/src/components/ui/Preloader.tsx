@@ -1,159 +1,230 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Compass, Ship, Sunrise, Tent, Flame, MapPin } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PreloaderProps {
   images: string[];
   onComplete: () => void;
 }
 
+const MIN_DISPLAY_MS = 5000; // minimum time the preloader stays visible
+
 export const Preloader = ({ images, onComplete }: PreloaderProps) => {
   const [progress, setProgress] = useState(0);
-  const [loadedCount, setLoadedCount] = useState(0);
-  const [activeMessage, setActiveMessage] = useState('Preparing your Tunisian journey...');
-  const [activeIcon, setActiveIcon] = useState<any>(Compass);
+  const [activeMessage, setActiveMessage] = useState("Mediterranean Horizons");
 
-  // Set up dynamic messages and matching icons based on load percentage
   useEffect(() => {
-    if (progress < 20) {
-      setActiveMessage('Preparing your Tunisian journey...');
-      setActiveIcon(() => Compass);
-    } else if (progress < 40) {
-      setActiveMessage('Unveiling the blue and white of Sidi Bou Said...');
-      setActiveIcon(() => MapPin);
-    } else if (progress < 60) {
-      setActiveMessage('Sifting the golden sands of the Sahara...');
-      setActiveIcon(() => Sunrise);
-    } else if (progress < 75) {
-      setActiveMessage('Catching the Mediterranean breeze at Kuriat Island...');
-      setActiveIcon(() => Ship);
-    } else if (progress < 90) {
-      setActiveMessage('Setting up camp under the stars at Cap Serrat...');
-      setActiveIcon(() => Tent);
-    } else {
-      setActiveMessage('Ready to explore boldly...');
-      setActiveIcon(() => Flame);
-    }
+    if (progress < 20) setActiveMessage("Mediterranean Horizons");
+    else if (progress < 40) setActiveMessage("Sidi Bou Said");
+    else if (progress < 60) setActiveMessage("Cap Serrat");
+    else if (progress < 80) setActiveMessage("Kuriat Islands");
+    else if (progress < 95) setActiveMessage("Sahara Adventures");
+    else setActiveMessage("Your Journey Begins");
   }, [progress]);
 
-  // Image preloading logic
   useEffect(() => {
-    if (!images || images.length === 0) {
+    document.body.style.overflow = "hidden";
+    const startTime = Date.now();
+    let imagesReady = images.length === 0; // true immediately if no images
+    let timerDone = false;
+    let fakeFrame: ReturnType<typeof setTimeout>;
+
+    // --- fake slow progress: 0 → 90% over ~4 seconds ---
+    const FAKE_DURATION = 4000; // ms to reach 90%
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const fakeProgress = Math.min(90, Math.round((elapsed / FAKE_DURATION) * 90));
+      setProgress(fakeProgress);
+      if (fakeProgress < 90) {
+        fakeFrame = setTimeout(tick, 80);
+      }
+    };
+    fakeFrame = setTimeout(tick, 80);
+
+    // --- real image preloading ---
+    const finishWhenReady = () => {
+      if (!imagesReady || !timerDone) return;
+      // sprint to 100% then call onComplete
       setProgress(100);
-      const timer = setTimeout(onComplete, 600);
-      return () => clearTimeout(timer);
+      setTimeout(() => {
+        document.body.style.overflow = "";
+        onComplete();
+      }, 600);
+    };
+
+    // minimum display timer
+    const minTimer = setTimeout(() => {
+      timerDone = true;
+      finishWhenReady();
+    }, MIN_DISPLAY_MS);
+
+    if (images.length === 0) {
+      imagesReady = true;
+      // finishWhenReady will be triggered by minTimer
+    } else {
+      const imagePromises = images.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          })
+      );
+      Promise.all(imagePromises).then(() => {
+        imagesReady = true;
+        finishWhenReady();
+      });
     }
 
-    let loaded = 0;
-    const total = images.length;
-
-    // Prevent scroll while loading
-    document.body.style.overflow = 'hidden';
-
-    const handleImageLoad = () => {
-      loaded += 1;
-      setLoadedCount(loaded);
-      const percentage = Math.round((loaded / total) * 100);
-      setProgress(percentage);
-    };
-
-    const imagePromises = images.map((src) => {
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-          handleImageLoad();
-          resolve();
-        };
-        img.onerror = () => {
-          handleImageLoad(); // Count error as loaded to not block the loader infinitely
-          resolve();
-        };
-      });
-    });
-
-    Promise.all(imagePromises).then(() => {
-      // Small buffer delay to display 100% complete state before callback
-      const timer = setTimeout(() => {
-        document.body.style.overflow = '';
-        onComplete();
-      }, 800);
-      return () => clearTimeout(timer);
-    });
-
     return () => {
-      document.body.style.overflow = '';
+      clearTimeout(fakeFrame);
+      clearTimeout(minTimer);
+      document.body.style.overflow = "";
     };
   }, [images, onComplete]);
-
-  // Dynamically render Lucide Icon
-  const IconComponent = activeIcon;
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ 
-        opacity: 0, 
-        scale: 1.05,
-        transition: { duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }
+      exit={{
+        opacity: 0,
+        scale: 1.03,
+        filter: "blur(20px)",
+        transition: {
+          duration: 0.9,
+          ease: [0.22, 1, 0.36, 1],
+        },
       }}
-      className="fixed inset-0 z-50 bg-[#0a0f1c] flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[9999] bg-black overflow-hidden flex items-center justify-center"
     >
-      {/* Decorative premium glows matching LandingPage design */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-teal-500/10 rounded-full blur-[150px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-orange-500/10 rounded-full blur-[150px]"></div>
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          animate={{
+            x: [-100, 100, -100],
+            y: [-50, 50, -50],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-white/[0.03] blur-3xl"
+        />
+
+        <motion.div
+          animate={{
+            x: [100, -100, 100],
+            y: [50, -50, 50],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-3xl"
+        />
       </div>
 
-      {/* Traditional ornament pattern background watermark */}
-      <div className="absolute inset-0 opacity-[0.01] bg-[url('https://images.unsplash.com/photo-1548625361-ec06a202cdd4?auto=format&fit=crop&q=80')] bg-repeat bg-center mix-blend-overlay"></div>
+      <div className="relative z-10 w-full max-w-5xl px-8 text-center">
+        {/* Logo */}
+        <motion.img
+          src="/images/traveland.png"
+          alt="Traveland"
+          initial={{
+            opacity: 0,
+            scale: 0.8,
+            y: 30,
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 1.2,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="h-40 md:h-52 lg:h-64 mx-auto mb-16 object-contain drop-shadow-2xl"
+        />
 
-      <div className="relative z-10 flex flex-col items-center max-w-md px-6 text-center">
-        {/* Glowing Central Spinning Icon */}
-        <div className="relative mb-10 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-teal-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 animate-pulse"></div>
-          <div className="relative w-28 h-28 bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-full flex items-center justify-center shadow-2xl">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-              className="text-orange-500"
+        {/* Dynamic destination text */}
+        <div className="h-16 mt-24 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={activeMessage}
+              initial={{
+                opacity: 0,
+                y: 20,
+                filter: "blur(10px)",
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+              }}
+              exit={{
+                opacity: 0,
+                y: -20,
+                filter: "blur(10px)",
+              }}
+              transition={{
+                duration: 0.6,
+              }}
+              className="text-white/70 uppercase tracking-[0.45em] text-xs md:text-sm"
             >
-              <IconComponent className="w-12 h-12 text-gradient bg-gradient-to-tr from-orange-400 to-amber-300" />
-            </motion.div>
+              {activeMessage}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        {/* Progress section */}
+        <div className="max-w-lg mx-auto mt-8">
+          <div className="h-[1px] bg-white/10 overflow-hidden">
+            <motion.div
+              animate={{
+                width: `${progress}%`,
+                opacity: [0.7, 1, 0.7],
+              }}
+              transition={{
+                width: {
+                  duration: 0.4,
+                  ease: "easeOut",
+                },
+                opacity: {
+                  repeat: Infinity,
+                  duration: 2,
+                },
+              }}
+              className="h-full bg-white"
+            />
+          </div>
+
+          <div className="flex justify-between mt-5">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/30">
+              Loading
+            </span>
+
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/30">
+              {progress}%
+            </span>
           </div>
         </div>
 
-
-
-        {/* Dynamic Traveling Message */}
-        <div className="h-12 flex items-center justify-center mb-6">
-          <motion.p
-            key={activeMessage}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.3 }}
-            className="text-slate-200 text-sm font-medium leading-relaxed drop-shadow"
-          >
-            {activeMessage}
-          </motion.p>
-        </div>
-
-        {/* Progress Bar Container */}
-        <div className="w-64 md:w-80 h-1.5 bg-slate-950/60 backdrop-blur border border-white/5 rounded-full overflow-hidden mb-3 relative">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-teal-500 rounded-full relative shadow-[0_0_12px_rgba(234,88,12,0.4)]"
-          />
-        </div>
-
-        {/* Progress details */}
-        <div className="flex justify-between w-64 md:w-80 text-[10px] font-bold text-slate-500 tracking-wider">
-          <span>{loadedCount} / {images.length} ASSETS</span>
-          <span className="text-orange-400">{progress}%</span>
-        </div>
+        {/* Bottom tagline */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            delay: 1.2,
+            duration: 1,
+          }}
+          className="mt-24"
+        >
+          <p className="text-white/20 text-xs tracking-[0.35em] uppercase">
+            Curated Experiences Across Tunisia
+          </p>
+        </motion.div>
       </div>
     </motion.div>
   );
