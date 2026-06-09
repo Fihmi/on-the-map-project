@@ -67,8 +67,7 @@ export const LandingPage = () => {
             loop
             muted
             playsInline
-            preload="none"
-            poster="https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=1920&q=80"
+            preload="auto"
             src={videoLanding}
             className="w-full h-full object-cover"
           />
