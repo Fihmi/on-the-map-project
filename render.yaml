@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: traveland-trips-backend
+    name: on-the-map-project
     runtime: node
     rootDir: backend
     buildCommand: npm install && npm run build
@@ -9,7 +9,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: 5001
       - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
