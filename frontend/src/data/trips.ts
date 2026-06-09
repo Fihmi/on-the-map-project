@@ -12,6 +12,7 @@ import trip2_3 from '../assets/Products/Trip-2/T222.jpg';
 import trip2_4 from '../assets/Products/Trip-2/T2222.jpg';
 import trip2_5 from '../assets/Products/Trip-2/T22222.jpg';
 
+
 // Import images for Trip 3
 import trip3_1 from '../assets/Products/Trip-3/T3.jpg';
 import trip3_2 from '../assets/Products/Trip-3/T33.webp';
