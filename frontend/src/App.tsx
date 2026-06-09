@@ -1,9 +1,10 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { InteractiveBackground } from './components/ui/InteractiveBackground';
 import { Preloader } from './components/ui/Preloader';
 import { tripsData } from './data/trips';
+import { apiClient } from './api/client';
 
 // Lazy-load route-level components so their JS chunks are never part of
 // the critical path — they are fetched in parallel once React has booted.
@@ -44,6 +45,11 @@ const preloadImagesList = [
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Wake up the Render backend immediately on mount (combats free-tier cold start)
+    apiClient.get('/health').catch(() => {});
+  }, []);
 
   return (
     <>
