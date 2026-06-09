@@ -38,7 +38,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -80,7 +80,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     res.cookie('jwt', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -124,7 +124,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction): 
       res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 

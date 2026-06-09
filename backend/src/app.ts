@@ -17,7 +17,9 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 const allowedOrigins = [
   'http://localhost:5173', // Vite default port
   'http://localhost:5174',
@@ -25,21 +27,21 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
-  'https://traveland-trips.vercel.app', // New Vercel deployment
+  'https://traveland-trips.vercel.app', // Vercel deployment
   'https://www.traveland-trips.vercel.app', // www subdomain
-  ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(s => s.trim()) : []),
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) { 
       callback(null, true);
-      
       return;
     }
     const isAllowed = allowedOrigins.includes(origin) ||
       origin.startsWith('http://localhost:') ||
       origin.startsWith('http://127.0.0.1:') ||
+      origin.endsWith('.vercel.app') ||
       /^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin);
 
     if (isAllowed) {
@@ -49,6 +51,8 @@ app.use(cors({
     }
   },
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Password'],
+  exposedHeaders: ['set-cookie'],
 }));
 app.use(express.json());
 app.use(cookieParser());
