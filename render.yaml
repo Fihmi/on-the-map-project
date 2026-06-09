@@ -11,12 +11,12 @@ services:
       - key: PORT
         value: 5001
       - key: MONGO_URI
-        sync: false
+        value: mongodb+srv://traveland-tripsdb:xVpX59bjHp2URYCN@cluster0.2xpou3c.mongodb.net/?appName=Cluster0
       - key: JWT_SECRET
-        sync: false
+        value: ae4920382b3ccf585ed8005a1279b8989bb53fa1ba342ad9ae3ec87e3d7f6b64
       - key: JWT_REFRESH_SECRET
-        sync: false
+        value: 145b56a30a2e838a5a9d7618631afe303dabb4c88146e754349c3bcbaff7b19a
       - key: ADMIN_PASSWORD
-        sync: false
+        value: admin1230
       - key: CORS_ORIGIN
         value: https://traveland-trips.vercel.app
