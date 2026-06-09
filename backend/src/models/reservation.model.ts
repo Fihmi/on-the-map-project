@@ -23,7 +23,7 @@ const reservationSchema = new Schema<IReservation>(
       enum: ['Not Paid', 'Pending', 'Paid'],
       default: 'Not Paid',
     },
-  },
+  }, 
   {
     timestamps: true,
   }
