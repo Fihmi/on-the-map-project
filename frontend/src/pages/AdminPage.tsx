@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package, Lock, Eye, EyeOff } from 'lucide-react';
+import { Users, Calendar, Mail, Phone, Home, ArrowLeft, Trash2, Plus, X, Package, Lock, Eye, EyeOff, FileDown, Loader2 } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { generateReservationTicket } from '../utils/generateTicket';
 import { tripsData } from '../data/trips';
 
 interface Reservation {
@@ -31,6 +32,7 @@ export const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newClientData, setNewClientData] = useState({
@@ -112,6 +114,20 @@ export const AdminPage = () => {
       setVerifying(false);
     }
   };
+
+  const handleDownloadTicket = async (res: Reservation) => {
+    if (downloadingId) return; // prevent concurrent downloads
+    setDownloadingId(res._id);
+    try {
+      await generateReservationTicket(res);
+    } catch (err) {
+      console.error('Failed to generate ticket PDF:', err);
+      alert('Could not generate the ticket PDF. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
@@ -346,7 +362,8 @@ export const AdminPage = () => {
                     <th className="px-6 py-4 font-semibold">Contact Info</th>
                     <th className="px-6 py-4 font-semibold">Date Booked</th>
                     <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                    <th className="px-6 py-4 font-semibold text-center">Ticket</th>
+                    <th className="px-6 py-4 font-semibold text-right">Delete</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -383,6 +400,24 @@ export const AdminPage = () => {
                           <option value="Paid">Paid</option>
                         </select>
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Download PDF */}
+                          <button
+                            onClick={() => handleDownloadTicket(res)}
+                            disabled={!!downloadingId}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 disabled:opacity-60 disabled:cursor-wait text-teal-700 rounded-lg text-xs font-bold transition-colors border border-teal-200 hover:border-teal-300"
+                            title="Download PDF Ticket"
+                          >
+                            {downloadingId === res._id
+                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              : <FileDown className="w-3.5 h-3.5" />}
+                            {downloadingId === res._id ? 'Generating…' : 'PDF'}
+                          </button>
+
+                        </div>
+                      </td>
+
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => deleteReservation(res._id)}

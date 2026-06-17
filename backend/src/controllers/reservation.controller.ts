@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Reservation } from '../models/reservation.model';
 
+
 export const createReservation = async (req: Request, res: Response) => {
   try {
     const { tripId, tripName, customerName, customerEmail, customerPhone, date } = req.body;
@@ -78,3 +79,6 @@ export const deleteReservation = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error deleting reservation.' });
   }
 };
+
+
+

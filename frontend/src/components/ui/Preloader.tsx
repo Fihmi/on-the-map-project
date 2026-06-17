@@ -95,135 +95,94 @@ export const Preloader = ({ images, onComplete }: PreloaderProps) => {
           ease: [0.22, 1, 0.36, 1],
         },
       }}
-      className="fixed inset-0 z-[9999] bg-black overflow-hidden flex items-center justify-center"
+      className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center"
+      style={{ background: "#0a0f1c" }}
     >
-      {/* Animated background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            x: [-100, 100, -100],
-            y: [-50, 50, -50],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-white/[0.03] blur-3xl"
-        />
+      {/* Ambient background glows — matches LandingPage fixed background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Teal glow — top-left, mirrors LandingPage */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-600/20 rounded-full blur-[120px] mix-blend-screen" />
+        {/* Indigo glow — bottom-right, mirrors LandingPage */}
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen" />
 
+        {/* Slow-drifting subtle orbs for depth */}
         <motion.div
-          animate={{
-            x: [100, -100, 100],
-            y: [50, -50, 50],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-3xl"
+          animate={{ x: [-100, 100, -100], y: [-50, 50, -50] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-teal-500/[0.04] blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [100, -100, 100], y: [50, -50, 50] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-indigo-500/[0.04] blur-3xl"
         />
       </div>
 
       <div className="relative z-10 w-full max-w-5xl px-8 text-center">
-        {/* Logo */}
+        {/* Logo — same placement as LandingPage hero */}
         <motion.img
           src="/images/traveland.png"
           alt="Traveland"
-          initial={{
-            opacity: 0,
-            scale: 0.8,
-            y: 30,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 1.2,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          initial={{ opacity: 0, scale: 0.8, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="h-40 md:h-52 lg:h-64 mx-auto mb-16 object-contain drop-shadow-2xl"
         />
 
-        {/* Dynamic destination text */}
+        {/* Dynamic destination text — gold (#f3e5ab) matches LandingPage accent */}
         <div className="h-16 mt-24 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.p
               key={activeMessage}
-              initial={{
-                opacity: 0,
-                y: 20,
-                filter: "blur(10px)",
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                filter: "blur(0px)",
-              }}
-              exit={{
-                opacity: 0,
-                y: -20,
-                filter: "blur(10px)",
-              }}
-              transition={{
-                duration: 0.6,
-              }}
-              className="text-white/70 uppercase tracking-[0.45em] text-xs md:text-sm"
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+              transition={{ duration: 0.6 }}
+              className="uppercase tracking-[0.45em] text-xs md:text-sm font-bold"
+              style={{ color: "#f3e5ab" }}
             >
               {activeMessage}
             </motion.p>
           </AnimatePresence>
         </div>
 
-        {/* Progress section */}
+        {/* Progress section — orange gradient bar matching LandingPage CTA */}
         <div className="max-w-lg mx-auto mt-8">
-          <div className="h-[1px] bg-white/10 overflow-hidden">
+          {/* Track: glassmorphism border, matching card style */}
+          <div className="h-[2px] bg-white/10 overflow-hidden rounded-full">
             <motion.div
               animate={{
                 width: `${progress}%`,
-                opacity: [0.7, 1, 0.7],
+                opacity: [0.8, 1, 0.8],
               }}
               transition={{
-                width: {
-                  duration: 0.4,
-                  ease: "easeOut",
-                },
-                opacity: {
-                  repeat: Infinity,
-                  duration: 2,
-                },
+                width: { duration: 0.4, ease: "easeOut" },
+                opacity: { repeat: Infinity, duration: 2 },
               }}
-              className="h-full bg-white"
+              className="h-full rounded-full bg-gradient-to-r from-orange-600 to-orange-400"
             />
           </div>
 
           <div className="flex justify-between mt-5">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-white/30">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-slate-400">
               Loading
             </span>
-
-            <span className="text-[10px] uppercase tracking-[0.4em] text-white/30">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-orange-400 font-bold">
               {progress}%
             </span>
           </div>
         </div>
 
-        {/* Bottom tagline */}
+        {/* Bottom tagline — matches LandingPage label style */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{
-            delay: 1.2,
-            duration: 1,
-          }}
+          transition={{ delay: 1.2, duration: 1 }}
           className="mt-24"
         >
-          <p className="text-white/20 text-xs tracking-[0.35em] uppercase">
+          <span className="text-orange-400 font-bold tracking-widest uppercase text-xs drop-shadow-sm">
             Curated Experiences Across Tunisia
-          </p>
+          </span>
         </motion.div>
       </div>
     </motion.div>
