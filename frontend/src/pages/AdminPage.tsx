@@ -46,6 +46,34 @@ export const AdminPage = () => {
     }
   });
 
+  const [tripExpenses, setTripExpenses] = useState<{ [tripId: string]: { id: string, label: string, amountTnd: number }[] }>(() => {
+    try {
+      const saved = localStorage.getItem('tripExpenses');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [newExpenseLabel, setNewExpenseLabel] = useState('');
+  const [newExpenseAmount, setNewExpenseAmount] = useState('');
+
+  const handleAddExpense = (tripId: string, label: string, amountTnd: number) => {
+    const currentList = tripExpenses[tripId] || [];
+    const newItem = { id: Date.now().toString(), label, amountTnd };
+    const updated = { ...tripExpenses, [tripId]: [...currentList, newItem] };
+    setTripExpenses(updated);
+    localStorage.setItem('tripExpenses', JSON.stringify(updated));
+  };
+
+  const handleRemoveExpense = (tripId: string, expenseId: string) => {
+    const currentList = tripExpenses[tripId] || [];
+    const updatedList = currentList.filter(item => item.id !== expenseId);
+    const updated = { ...tripExpenses, [tripId]: updatedList };
+    setTripExpenses(updated);
+    localStorage.setItem('tripExpenses', JSON.stringify(updated));
+  };
+
   const handleCostChange = (tripId: string, value: number) => {
     const updated = { ...manualCosts, [tripId]: value };
     setManualCosts(updated);
@@ -374,11 +402,16 @@ export const AdminPage = () => {
       ? manualIncomes[tripId]
       : totalAmountPaid;
     
-    // Outcome is filled manually in TND if present (converted to Euro), otherwise default to fixedCost + (paidCount * costPerPerson)
+    // Outcome is calculated from detailed expenses if present, otherwise manual costs in TND, otherwise default formula
+    const currentExpenses = tripExpenses[tripId] || [];
+    const totalExpensesTnd = currentExpenses.reduce((sum, item) => sum + item.amountTnd, 0);
+
     const paidCount = tripReservations.filter(r => r.status === 'Paid').length;
-    const totalCost = manualCosts[tripId] !== undefined
-      ? (manualCosts[tripId] / 3.4)
-      : (paidCount > 0 ? (fixedCost + (paidCount * costPerPerson)) : 0);
+    const totalCost = currentExpenses.length > 0
+      ? (totalExpensesTnd / 3.4)
+      : (manualCosts[tripId] !== undefined
+         ? (manualCosts[tripId] / 3.4)
+         : (paidCount > 0 ? (fixedCost + (paidCount * costPerPerson)) : 0));
       
     const netProfit = receivedIncome - totalCost;
 
@@ -552,12 +585,20 @@ export const AdminPage = () => {
                       </div>
                     </div>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Outcome (Edit DT)</div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">
+                        Outcome {tripExpenses[trip.id]?.length > 0 ? '(Detailed)' : '(Edit DT)'}
+                      </div>
                       <input
                         type="number"
                         min="0"
-                        className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center"
-                        value={manualCosts[trip.id] !== undefined ? manualCosts[trip.id] : (trip.financials.totalCost * 3.4).toFixed(0)}
+                        disabled={tripExpenses[trip.id]?.length > 0}
+                        className={`w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center ${
+                          tripExpenses[trip.id]?.length > 0 ? 'bg-slate-100/80 cursor-not-allowed text-slate-500' : ''
+                        }`}
+                        value={tripExpenses[trip.id]?.length > 0 
+                          ? tripExpenses[trip.id].reduce((sum, item) => sum + item.amountTnd, 0).toFixed(0)
+                          : (manualCosts[trip.id] !== undefined ? manualCosts[trip.id] : (trip.financials.totalCost * 3.4).toFixed(0))
+                        }
                         onChange={(e) => handleCostChange(trip.id, parseFloat(e.target.value) || 0)}
                       />
                       <div className="text-[8px] text-slate-500 mt-1">
@@ -884,9 +925,11 @@ export const AdminPage = () => {
               )}
             </div>
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expenses (Editable on Dashboard)</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expenses</div>
               <div className="text-lg font-black text-red-500 mt-1">{formatMoney(financials.totalCost)}</div>
-              {manualCosts[selectedTripId || ''] === undefined ? (
+              {(tripExpenses[selectedTripId || ''] || []).length > 0 ? (
+                <div className="text-[10px] text-teal-600 font-semibold">Calculated from detailed expenses</div>
+              ) : manualCosts[selectedTripId || ''] === undefined ? (
                 <div className="text-[10px] text-slate-400">Fixed: €{financials.fixedCost} + Paid Var: €{financials.costPerPerson * paidReservations.length}</div>
               ) : (
                 <div className="text-[10px] text-teal-600 font-semibold">Manually set value</div>
@@ -900,6 +943,81 @@ export const AdminPage = () => {
                 {formatMoney(financials.netProfit)}
               </div>
               <div className="text-[10px] text-slate-400">Income - Expenses</div>
+            </div>
+          </div>
+
+          {/* Detailed Outcomes (Expenses) list */}
+          <div className="mt-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span>Detailed Outcomes / Expenses</span>
+              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-normal animate-none">
+                {(tripExpenses[selectedTripId || ''] || []).length} items
+              </span>
+            </h3>
+
+            {/* List of current expenses */}
+            <div className="space-y-2 mb-4">
+              {(tripExpenses[selectedTripId || ''] || []).length === 0 ? (
+                <p className="text-slate-400 text-sm italic">No detailed outcomes added yet. Use the form below to add them.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(tripExpenses[selectedTripId || ''] || []).map((exp) => (
+                    <div key={exp.id} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-xl p-3">
+                      <div>
+                        <span className="font-bold text-slate-800 text-sm">{exp.label}</span>
+                        <span className="text-[10px] text-slate-400 ml-2">({(exp.amountTnd / 3.4).toFixed(1)} €)</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-slate-900 text-sm">{exp.amountTnd} DT</span>
+                        <button
+                          onClick={() => handleRemoveExpense(selectedTripId || '', exp.id)}
+                          className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors"
+                          title="Remove item"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add new expense item form */}
+            <div className="pt-4 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-end gap-3">
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Expense Label</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Transport, Food, Guide"
+                  value={newExpenseLabel}
+                  onChange={(e) => setNewExpenseLabel(e.target.value)}
+                  className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-teal-500"
+                />
+              </div>
+              <div className="w-32">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount (DT)</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={newExpenseAmount}
+                  onChange={(e) => setNewExpenseAmount(e.target.value)}
+                  className="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-center outline-none focus:border-teal-500"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newExpenseLabel.trim() || !newExpenseAmount) return;
+                  handleAddExpense(selectedTripId || '', newExpenseLabel.trim(), parseFloat(newExpenseAmount) || 0);
+                  setNewExpenseLabel('');
+                  setNewExpenseAmount('');
+                }}
+                className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2 rounded-lg h-9 transition-colors flex items-center gap-1.5"
+              >
+                <Plus size={14} /> Add Item
+              </button>
             </div>
           </div>
         </div>
