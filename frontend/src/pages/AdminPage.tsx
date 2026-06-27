@@ -273,17 +273,12 @@ export const AdminPage = () => {
   const updateStatus = async (id: string, newStatus: string) => {
     const res = reservations.find(r => r._id === id);
     if (!res) return;
-    const currentPrice = res.price !== undefined && res.price !== null ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0));
+    const currentPrice = res.price !== undefined && res.price !== null && res.price > 0 ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0));
     
     const fields: Partial<Reservation> = { status: newStatus };
     if (newStatus === 'Paid') {
-      const promptVal = window.prompt(`How much did ${res.customerName} pay? (€)`, currentPrice.toString());
-      if (promptVal === null) {
-        // User cancelled, refresh selection to reset dropdown
-        setReservations(prev => [...prev]);
-        return;
-      }
-      fields.amountPaid = parseFloat(promptVal) || 0;
+      fields.amountPaid = currentPrice;
+      fields.price = currentPrice;
     } else if (newStatus === 'Not Paid') {
       fields.amountPaid = 0;
     }
@@ -547,17 +542,13 @@ export const AdminPage = () => {
 
                   {/* Financials details on card */}
                   <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Income (Edit)</div>
-                      <input
-                        type="number"
-                        min="0"
-                        className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center"
-                        value={manualIncomes[trip.id] ?? trip.financials.receivedIncome}
-                        onChange={(e) => handleIncomeChange(trip.id, parseFloat(e.target.value) || 0)}
-                      />
+                    <div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Income</div>
+                      <div className="text-xs font-bold text-slate-800 mt-1">
+                        €{trip.financials.receivedIncome}
+                      </div>
                       <div className="text-[8px] text-slate-500 mt-1">
-                        {((manualIncomes[trip.id] ?? trip.financials.receivedIncome) * 3.4).toFixed(0)} DT
+                        {(trip.financials.receivedIncome * 3.4).toFixed(0)} DT
                       </div>
                     </div>
                     <div onClick={(e) => e.stopPropagation()}>
@@ -696,14 +687,12 @@ export const AdminPage = () => {
                         </div>
                         <div className="flex items-center text-slate-500 text-xs mt-1 animate-none">
                   <Phone className="w-3.5 h-3.5 mr-1.5 text-slate-400 shrink-0" />
-                          {client.phone}
+                    {client.phone}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-3">
-                          {client.reservations.map((res) => {
-                            const defaultTripPrice = res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0);
-                            const currentPrice = res.price !== undefined && res.price !== null ? res.price : defaultTripPrice;
+                           {client.reservations.map((res) => {
                             const currentAmountPaid = res.amountPaid || 0;
                             return (
                               <div key={res._id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -719,22 +708,15 @@ export const AdminPage = () => {
                                   <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-3">
                                     <span>Date: {res.date}</span>
                                     <div className="flex items-center gap-1">
-                                      <span>Price: €</span>
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        value={currentPrice}
-                                        onChange={(e) => updateReservationFields(res._id, { price: parseFloat(e.target.value) || 0 })}
-                                        className="w-14 px-1 py-0.5 border border-slate-300 rounded text-slate-800 text-center font-bold"
-                                      />
-                                    </div>
-                                    <div className="flex items-center gap-1">
                                       <span>Paid: €</span>
                                       <input
                                         type="number"
                                         min="0"
                                         value={currentAmountPaid}
-                                        onChange={(e) => updateReservationFields(res._id, { amountPaid: parseFloat(e.target.value) || 0 })}
+                                        onChange={(e) => {
+                                          const val = parseFloat(e.target.value) || 0;
+                                          updateReservationFields(res._id, { amountPaid: val, price: val });
+                                        }}
                                         className="w-14 px-1 py-0.5 border border-slate-300 rounded text-slate-800 text-center font-bold"
                                       />
                                     </div>
@@ -936,8 +918,7 @@ export const AdminPage = () => {
                   <tr>
                     <th className="px-6 py-4 font-semibold">Customer Name</th>
                     <th className="px-6 py-4 font-semibold">Contact Info</th>
-                    <th className="px-6 py-4 font-semibold">Price</th>
-                    <th className="px-6 py-4 font-semibold">Amount Paid</th>
+                    <th className="px-6 py-4 font-semibold">Paid (€)</th>
                     <th className="px-6 py-4 font-semibold">Date Booked</th>
                     <th className="px-6 py-4 font-semibold">Status</th>
                     <th className="px-6 py-4 font-semibold text-center">Ticket</th>
@@ -973,20 +954,11 @@ export const AdminPage = () => {
                           <input
                             type="number"
                             min="0"
-                            value={res.price !== undefined && res.price !== null ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0))}
-                            onChange={(e) => updateReservationFields(res._id, { price: parseFloat(e.target.value) || 0 })}
-                            className="w-16 px-1.5 py-1 border border-slate-300 rounded text-slate-800 text-center font-bold text-xs"
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1">
-                          <span className="text-slate-400 text-xs">€</span>
-                          <input
-                            type="number"
-                            min="0"
                             value={res.amountPaid || 0}
-                            onChange={(e) => updateReservationFields(res._id, { amountPaid: parseFloat(e.target.value) || 0 })}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              updateReservationFields(res._id, { amountPaid: val, price: val });
+                            }}
                             className="w-16 px-1.5 py-1 border border-slate-300 rounded text-slate-800 text-center font-bold text-xs"
                           />
                         </div>
@@ -1111,11 +1083,12 @@ export const AdminPage = () => {
                       const newStatus = e.target.value;
                       let updatedAmountPaid = newClientData.amountPaid;
                       if (newStatus === 'Paid' && newClientData.amountPaid === 0) {
-                        updatedAmountPaid = newClientData.price;
+                        const defaultTripPrice = selectedTripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === selectedTripId)?.price || 0);
+                        updatedAmountPaid = defaultTripPrice;
                       } else if (newStatus === 'Not Paid') {
                         updatedAmountPaid = 0;
                       }
-                      setNewClientData({...newClientData, status: newStatus, amountPaid: updatedAmountPaid});
+                      setNewClientData({...newClientData, status: newStatus, amountPaid: updatedAmountPaid, price: updatedAmountPaid});
                     }}
                   >
                     <option value="Not Paid">Not Paid</option>
@@ -1124,36 +1097,19 @@ export const AdminPage = () => {
                   </select>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Price (€)</label>
-                    <input 
-                      required
-                      type="number" 
-                      min="0"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-bold" 
-                      value={newClientData.price}
-                      onChange={e => {
-                        const newPrice = parseFloat(e.target.value) || 0;
-                        let updatedAmountPaid = newClientData.amountPaid;
-                        if (newClientData.status === 'Paid') {
-                          updatedAmountPaid = newPrice;
-                        }
-                        setNewClientData({...newClientData, price: newPrice, amountPaid: updatedAmountPaid});
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Amount Paid (€)</label>
-                    <input 
-                      required
-                      type="number" 
-                      min="0"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-bold" 
-                      value={newClientData.amountPaid}
-                      onChange={e => setNewClientData({...newClientData, amountPaid: parseFloat(e.target.value) || 0})}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Amount Paid (€)</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-bold" 
+                    value={newClientData.amountPaid}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setNewClientData({...newClientData, amountPaid: val, price: val});
+                    }}
+                  />
                 </div>
                 
                 <div className="pt-4 flex gap-3">
