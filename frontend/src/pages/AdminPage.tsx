@@ -50,6 +50,106 @@ export const AdminPage = () => {
     localStorage.setItem('tripManualCosts', JSON.stringify(updated));
   };
 
+  const [manualIncomes, setManualIncomes] = useState<{ [tripId: string]: number }>(() => {
+    try {
+      const saved = localStorage.getItem('tripManualIncomes');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleIncomeChange = (tripId: string, value: number) => {
+    const updated = { ...manualIncomes, [tripId]: value };
+    setManualIncomes(updated);
+    localStorage.setItem('tripManualIncomes', JSON.stringify(updated));
+  };
+
+  const [onTheMapClients, setOnTheMapClients] = useState<{ [clientKey: string]: boolean }>(() => {
+    try {
+      const saved = localStorage.getItem('onTheMapClients');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const getClientKey = (email: string, phone: string) => {
+    const emailKey = email && email !== 'N/A' ? email.toLowerCase().trim() : '';
+    const phoneKey = phone ? phone.trim() : '';
+    return emailKey || phoneKey || 'unknown';
+  };
+
+  const toggleOnTheMap = (resId: string) => {
+    // Find the reservation to get the client details
+    const res = reservations.find(r => r._id === resId);
+    if (!res) return;
+    const clientKey = getClientKey(res.customerEmail, res.customerPhone);
+    if (clientKey === 'unknown') return;
+
+    const updated = { ...onTheMapClients, [clientKey]: !onTheMapClients[clientKey] };
+    setOnTheMapClients(updated);
+    localStorage.setItem('onTheMapClients', JSON.stringify(updated));
+  };
+
+  const getAugmentedReservations = (): Reservation[] => {
+    const list = [...reservations];
+    const clientsMap: {
+      [key: string]: {
+        name: string;
+        email: string;
+        phone: string;
+        tripIds: Set<string>;
+        firstCreatedAt: string;
+      }
+    } = {};
+
+    reservations.forEach(res => {
+      const key = getClientKey(res.customerEmail, res.customerPhone);
+      if (key === 'unknown') return;
+      if (!clientsMap[key]) {
+        clientsMap[key] = {
+          name: res.customerName,
+          email: res.customerEmail,
+          phone: res.customerPhone,
+          tripIds: new Set<string>(),
+          firstCreatedAt: res.createdAt
+        };
+      }
+      clientsMap[key].tripIds.add(res.tripId);
+    });
+
+    const mapTrips = [
+      { id: 'trip-1', name: 'Historic Tunis City Tour' },
+      { id: 'trip-2', name: 'El Djem Amphitheater' },
+      { id: 'trip-5', name: 'Kuriat Island' },
+      { id: 'trip-4', name: 'Camping Adventure' }
+    ];
+
+    Object.keys(onTheMapClients).forEach(clientKey => {
+      if (onTheMapClients[clientKey] && clientsMap[clientKey]) {
+        const client = clientsMap[clientKey];
+        mapTrips.forEach(mTrip => {
+          if (!client.tripIds.has(mTrip.id)) {
+            list.push({
+              _id: `virtual-${clientKey}-${mTrip.id}`,
+              tripId: mTrip.id,
+              tripName: mTrip.name,
+              customerName: client.name,
+              customerEmail: client.email,
+              customerPhone: client.phone,
+              date: tripsData.find(t => t.id === mTrip.id)?.date || 'TBD',
+              status: 'Paid',
+              createdAt: client.firstCreatedAt
+            });
+          }
+        });
+      }
+    });
+
+    return list;
+  };
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newClientData, setNewClientData] = useState({
     customerName: '',
@@ -245,11 +345,15 @@ export const AdminPage = () => {
     }
 
     const expectedIncome = count * price;
-    const receivedIncome = paidCount * price;
     
-    // Outcome is filled manually if present, otherwise default to fixedCost + (paidCount * costPerPerson)
+    // Income (received) is filled manually if present, otherwise default to paidCount * price
+    const receivedIncome = manualIncomes[tripId] !== undefined
+      ? manualIncomes[tripId]
+      : (paidCount * price);
+    
+    // Outcome is filled manually in TND if present (converted to Euro), otherwise default to fixedCost + (paidCount * costPerPerson)
     const totalCost = manualCosts[tripId] !== undefined
-      ? manualCosts[tripId]
+      ? (manualCosts[tripId] / 3.4)
       : (paidCount > 0 ? (fixedCost + (paidCount * costPerPerson)) : 0);
       
     const netProfit = receivedIncome - totalCost;
@@ -272,8 +376,9 @@ export const AdminPage = () => {
   };
 
   const renderDashboard = () => {
+    const augmentedReservations = getAugmentedReservations();
     const tripCounts = tripsData.map(trip => {
-      const tripReservations = reservations.filter(r => r.tripId === trip.id);
+      const tripReservations = augmentedReservations.filter(r => r.tripId === trip.id);
       const paidReservations = tripReservations.filter(r => r.status === 'Paid');
       const financials = getTripFinancials(trip.id, tripReservations.length, paidReservations.length);
       return {
@@ -283,7 +388,7 @@ export const AdminPage = () => {
       };
     });
 
-    const packReservations = reservations.filter(r => r.tripId === 'pack-ultimate');
+    const packReservations = augmentedReservations.filter(r => r.tripId === 'pack-ultimate');
     const packPaid = packReservations.filter(r => r.status === 'Paid');
     const packFinancials = getTripFinancials('pack-ultimate', packReservations.length, packPaid.length);
 
@@ -292,12 +397,12 @@ export const AdminPage = () => {
     let grandReceivedIncome = 0;
     let grandTotalCost = 0;
 
-    const tripIds = new Set(reservations.map(r => r.tripId));
+    const tripIds = new Set(augmentedReservations.map(r => r.tripId));
     tripsData.forEach(t => tripIds.add(t.id));
     tripIds.add('pack-ultimate');
 
     tripIds.forEach(id => {
-      const tripReservations = reservations.filter(r => r.tripId === id);
+      const tripReservations = augmentedReservations.filter(r => r.tripId === id);
       const paidReservations = tripReservations.filter(r => r.status === 'Paid');
       const financials = getTripFinancials(id, tripReservations.length, paidReservations.length);
       
@@ -313,18 +418,14 @@ export const AdminPage = () => {
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold text-slate-900">Trip Dashboard</h2>
-            <p className="text-slate-500 mt-2">Select a trip to view registrations. Adjust Outcomes (costs) manually directly in the input fields.</p>
+            <p className="text-slate-500 mt-2">Select a trip to view registrations. Adjust Incomes and Outcomes manually directly in the input fields.</p>
           </div>
         </div>
 
         {/* Global Financial Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Expected Income</div>
-            <div className="text-lg font-black text-slate-900 mt-1.5">{formatMoney(grandExpectedIncome)}</div>
-          </div>
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Received Income</div>
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Income</div>
             <div className="text-lg font-black text-green-600 mt-1.5">{formatMoney(grandReceivedIncome)}</div>
           </div>
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
@@ -334,7 +435,7 @@ export const AdminPage = () => {
           <div className={`p-5 rounded-2xl shadow-sm border ${
             grandNetProfit >= 0 ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200'
           }`}>
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Net Profit (from Received)</div>
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Net Profit</div>
             <div className={`text-lg font-black mt-1.5 ${grandNetProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
               {formatMoney(grandNetProfit)}
             </div>
@@ -364,21 +465,30 @@ export const AdminPage = () => {
                   <div className="text-[10px] font-bold text-white/80 uppercase">Bookings</div>
                   <div className="text-xl font-bold">{packReservations.length}</div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
-                  <div className="text-[10px] font-bold text-white/80 uppercase">Income</div>
-                  <div className="text-sm font-bold">{formatMoney(packFinancials.receivedIncome)}</div>
-                </div>
                 <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20" onClick={(e) => e.stopPropagation()}>
-                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Expenses (Edit)</div>
+                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Income (Edit)</div>
                   <input
                     type="number"
                     min="0"
                     className="w-20 text-xs font-bold text-slate-800 bg-white rounded px-1.5 py-0.5 text-center"
-                    value={manualCosts['pack-ultimate'] ?? packFinancials.totalCost}
+                    value={manualIncomes['pack-ultimate'] ?? packFinancials.receivedIncome}
+                    onChange={(e) => handleIncomeChange('pack-ultimate', parseFloat(e.target.value) || 0)}
+                  />
+                  <div className="text-[9px] text-white/90 mt-1">
+                    {((manualIncomes['pack-ultimate'] ?? packFinancials.receivedIncome) * 3.4).toFixed(0)} DT
+                  </div>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20" onClick={(e) => e.stopPropagation()}>
+                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Expenses (Edit DT)</div>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-20 text-xs font-bold text-slate-800 bg-white rounded px-1.5 py-0.5 text-center"
+                    value={manualCosts['pack-ultimate'] !== undefined ? manualCosts['pack-ultimate'] : (packFinancials.totalCost * 3.4).toFixed(0)}
                     onChange={(e) => handleCostChange('pack-ultimate', parseFloat(e.target.value) || 0)}
                   />
                   <div className="text-[9px] text-white/90 mt-1">
-                    {((manualCosts['pack-ultimate'] ?? packFinancials.totalCost) * 3.4).toFixed(0)} DT
+                    €{packFinancials.totalCost.toFixed(1)}
                   </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
@@ -411,23 +521,30 @@ export const AdminPage = () => {
 
                   {/* Financials details on card */}
                   <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Income</div>
-                      <div className="text-xs font-bold text-slate-800">€{trip.financials.receivedIncome}</div>
-                      <div className="text-[8px] text-slate-400">{(trip.financials.receivedIncome * 3.4).toFixed(0)} DT</div>
-                      <div className="text-[8px] text-slate-400 mt-1">of €{trip.financials.expectedIncome}</div>
-                    </div>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Outcome (Edit)</div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Income (Edit)</div>
                       <input
                         type="number"
                         min="0"
                         className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center"
-                        value={manualCosts[trip.id] ?? trip.financials.totalCost}
+                        value={manualIncomes[trip.id] ?? trip.financials.receivedIncome}
+                        onChange={(e) => handleIncomeChange(trip.id, parseFloat(e.target.value) || 0)}
+                      />
+                      <div className="text-[8px] text-slate-500 mt-1">
+                        {((manualIncomes[trip.id] ?? trip.financials.receivedIncome) * 3.4).toFixed(0)} DT
+                      </div>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Outcome (Edit DT)</div>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center"
+                        value={manualCosts[trip.id] !== undefined ? manualCosts[trip.id] : (trip.financials.totalCost * 3.4).toFixed(0)}
                         onChange={(e) => handleCostChange(trip.id, parseFloat(e.target.value) || 0)}
                       />
                       <div className="text-[8px] text-slate-500 mt-1">
-                        {((manualCosts[trip.id] ?? trip.financials.totalCost) * 3.4).toFixed(0)} DT
+                        €{trip.financials.totalCost.toFixed(1)}
                       </div>
                     </div>
                     <div>
@@ -454,6 +571,7 @@ export const AdminPage = () => {
   };
 
   const renderClientsSection = () => {
+    const augmentedReservations = getAugmentedReservations();
     // Group reservations by client
     const clientsMap: {
       [key: string]: {
@@ -466,7 +584,7 @@ export const AdminPage = () => {
       };
     } = {};
 
-    reservations.forEach((res) => {
+    augmentedReservations.forEach((res) => {
       const emailKey = res.customerEmail && res.customerEmail !== 'N/A' ? res.customerEmail.toLowerCase().trim() : '';
       const phoneKey = res.customerPhone ? res.customerPhone.trim() : '';
       const key = emailKey || phoneKey || 'unknown';
@@ -569,13 +687,31 @@ export const AdminPage = () => {
                             return (
                               <div key={res._id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
-                                  <div className="font-semibold text-slate-800 text-sm">{res.tripName}</div>
+                                  <div className="font-semibold text-slate-800 text-sm flex items-center gap-1.5">
+                                    {res.tripName}
+                                    {onTheMapClients[getClientKey(res.customerEmail, res.customerPhone)] && (
+                                      <span className="bg-teal-100 text-teal-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-teal-200 uppercase tracking-wide">
+                                        On The Map
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-3">
                                     <span>Date: {res.date}</span>
                                     <span>Price: {formatMoney(tripPrice)}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => toggleOnTheMap(res._id)}
+                                    className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
+                                      onTheMapClients[getClientKey(res.customerEmail, res.customerPhone)]
+                                        ? 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700'
+                                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                    title="Toggle On The Map Badge"
+                                  >
+                                    Map Badge
+                                  </button>
                                   <select
                                     value={res.status}
                                     onChange={(e) => updateStatus(res._id, e.target.value)}
@@ -644,7 +780,8 @@ export const AdminPage = () => {
     const trip = isPackView
       ? null
       : tripsData.find(t => t.id === selectedTripId);
-    const tripReservations = reservations.filter(r => r.tripId === selectedTripId);
+    const augmentedReservations = getAugmentedReservations();
+    const tripReservations = augmentedReservations.filter(r => r.tripId === selectedTripId);
     const paidReservations = tripReservations.filter(r => r.status === 'Paid');
     const financials = getTripFinancials(selectedTripId || '', tripReservations.length, paidReservations.length);
 
@@ -703,16 +840,15 @@ export const AdminPage = () => {
           )}
 
           {/* Detailed Financial Summary */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected Revenue</div>
-              <div className="text-lg font-black text-slate-800 mt-1">{formatMoney(financials.expectedIncome)}</div>
-              <div className="text-[10px] text-slate-400">Total Bookings * Price</div>
-            </div>
-            <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Collected Revenue</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Income</div>
               <div className="text-lg font-black text-green-600 mt-1">{formatMoney(financials.receivedIncome)}</div>
-              <div className="text-[10px] text-slate-400">Paid Bookings * Price</div>
+              {manualIncomes[selectedTripId || ''] === undefined ? (
+                <div className="text-[10px] text-slate-400">Paid Bookings * Price</div>
+              ) : (
+                <div className="text-[10px] text-teal-600 font-semibold">Manually set value</div>
+              )}
             </div>
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expenses (Editable on Dashboard)</div>
@@ -730,7 +866,7 @@ export const AdminPage = () => {
               <div className={`text-lg font-black mt-1 ${financials.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                 {formatMoney(financials.netProfit)}
               </div>
-              <div className="text-[10px] text-slate-400">Collected - Expenses</div>
+              <div className="text-[10px] text-slate-400">Income - Expenses</div>
             </div>
           </div>
         </div>
@@ -759,7 +895,14 @@ export const AdminPage = () => {
                   {tripReservations.map((res) => (
                     <tr key={res._id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900">{res.customerName}</div>
+                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                          {res.customerName}
+                          {onTheMapClients[getClientKey(res.customerEmail, res.customerPhone)] && (
+                            <span className="bg-teal-100 text-teal-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-teal-200 uppercase tracking-wide">
+                              On The Map
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center text-slate-600 mb-1.5">
@@ -775,19 +918,32 @@ export const AdminPage = () => {
                         {new Date(res.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={res.status}
-                          onChange={(e) => updateStatus(res._id, e.target.value)}
-                          className={`appearance-none outline-none inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer border-2 transition-colors ${
-                            res.status === 'Paid' ? 'bg-green-50 text-green-700 border-green-200 hover:border-green-300 focus:ring-2 focus:ring-green-500' :
-                            res.status === 'Not Paid' ? 'bg-red-50 text-red-700 border-red-200 hover:border-red-300 focus:ring-2 focus:ring-red-500' :
-                            'bg-yellow-50 text-yellow-700 border-yellow-200 hover:border-yellow-300 focus:ring-2 focus:ring-yellow-500'
-                          }`}
-                        >
-                          <option value="Not Paid">Not Paid</option>
-                          <option value="Pending">Pending</option>
-                          <option value="Paid">Paid</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={res.status}
+                            onChange={(e) => updateStatus(res._id, e.target.value)}
+                            className={`appearance-none outline-none inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer border-2 transition-colors ${
+                              res.status === 'Paid' ? 'bg-green-50 text-green-700 border-green-200 hover:border-green-300 focus:ring-2 focus:ring-green-500' :
+                              res.status === 'Not Paid' ? 'bg-red-50 text-red-700 border-red-200 hover:border-red-300 focus:ring-2 focus:ring-red-500' :
+                              'bg-yellow-50 text-yellow-700 border-yellow-200 hover:border-yellow-300 focus:ring-2 focus:ring-yellow-500'
+                            }`}
+                          >
+                            <option value="Not Paid">Not Paid</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Paid">Paid</option>
+                          </select>
+                          <button
+                            onClick={() => toggleOnTheMap(res._id)}
+                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold border transition-colors ${
+                              onTheMapClients[getClientKey(res.customerEmail, res.customerPhone)]
+                                ? 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            }`}
+                            title="Toggle On The Map Badge"
+                          >
+                            Map Badge
+                          </button>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
