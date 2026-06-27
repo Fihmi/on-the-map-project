@@ -146,7 +146,7 @@ export const tripsData: Trip[] = [
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
     date: 'July 26, 2026',
-    registrationClosed: true,
+    registrationDeadline: 'July 18, 2026',
     fixedCost: 350,
     costPerPerson: 15
   },

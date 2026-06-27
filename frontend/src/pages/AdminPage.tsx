@@ -276,8 +276,14 @@ export const AdminPage = () => {
     const currentPrice = res.price !== undefined && res.price !== null ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0));
     
     const fields: Partial<Reservation> = { status: newStatus };
-    if (newStatus === 'Paid' && (!res.amountPaid || res.amountPaid === 0)) {
-      fields.amountPaid = currentPrice;
+    if (newStatus === 'Paid') {
+      const promptVal = window.prompt(`How much did ${res.customerName} pay? (€)`, currentPrice.toString());
+      if (promptVal === null) {
+        // User cancelled, refresh selection to reset dropdown
+        setReservations(prev => [...prev]);
+        return;
+      }
+      fields.amountPaid = parseFloat(promptVal) || 0;
     } else if (newStatus === 'Not Paid') {
       fields.amountPaid = 0;
     }
