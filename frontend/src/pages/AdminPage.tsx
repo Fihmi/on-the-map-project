@@ -14,6 +14,8 @@ interface Reservation {
   customerPhone: string;
   date: string;
   status: string;
+  price?: number;
+  amountPaid?: number;
   createdAt: string;
 }
 
@@ -140,6 +142,8 @@ export const AdminPage = () => {
               customerPhone: client.phone,
               date: tripsData.find(t => t.id === mTrip.id)?.date || 'TBD',
               status: 'Paid',
+              price: mTrip.id === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === mTrip.id)?.price || 0),
+              amountPaid: mTrip.id === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === mTrip.id)?.price || 0),
               createdAt: client.firstCreatedAt
             });
           }
@@ -155,7 +159,9 @@ export const AdminPage = () => {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
-    status: 'Not Paid'
+    status: 'Not Paid',
+    price: 0,
+    amountPaid: 0
   });
 
   useEffect(() => {
@@ -245,22 +251,38 @@ export const AdminPage = () => {
   };
 
 
-  const updateStatus = async (id: string, newStatus: string) => {
+  const updateReservationFields = async (id: string, fields: Partial<Reservation>) => {
     try {
-      await apiClient.put(`/reservations/${id}/status`, { status: newStatus }, {
+      const response = await apiClient.put(`/reservations/${id}/status`, fields, {
         headers: { 'X-Admin-Password': password }
       });
-      setReservations(prev => prev.map(r => r._id === id ? { ...r, status: newStatus } : r));
+      const updatedRes = response.data.reservation;
+      setReservations(prev => prev.map(r => r._id === id ? { ...r, ...updatedRes } : r));
     } catch (err: any) {
-      console.error('Error updating status:', err);
+      console.error('Error updating reservation:', err);
       if (err.response?.status === 401) {
         sessionStorage.removeItem('adminPassword');
         setIsAuthorized(false);
         setLoginError('Session expired. Please log in again.');
       } else {
-        alert('Failed to update status.');
+        alert('Failed to update reservation details.');
       }
     }
+  };
+
+  const updateStatus = async (id: string, newStatus: string) => {
+    const res = reservations.find(r => r._id === id);
+    if (!res) return;
+    const currentPrice = res.price !== undefined && res.price !== null ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0));
+    
+    const fields: Partial<Reservation> = { status: newStatus };
+    if (newStatus === 'Paid' && (!res.amountPaid || res.amountPaid === 0)) {
+      fields.amountPaid = currentPrice;
+    } else if (newStatus === 'Not Paid') {
+      fields.amountPaid = 0;
+    }
+    
+    await updateReservationFields(id, fields);
   };
 
   const deleteReservation = async (id: string) => {
@@ -298,24 +320,19 @@ export const AdminPage = () => {
         date: trip.date || new Date().toISOString(),
         customerName: newClientData.customerName,
         customerEmail: newClientData.customerEmail,
-        customerPhone: newClientData.customerPhone
+        customerPhone: newClientData.customerPhone,
+        status: newClientData.status,
+        price: newClientData.price,
+        amountPaid: newClientData.amountPaid
       }, {
         headers: { 'X-Admin-Password': password }
       });
 
-      // The backend creates it with default status. We update it if it's different.
       let createdReservation = response.data.reservation;
-      
-      if (newClientData.status !== createdReservation.status) {
-         await apiClient.put(`/reservations/${createdReservation._id}/status`, { status: newClientData.status }, {
-           headers: { 'X-Admin-Password': password }
-         });
-         createdReservation.status = newClientData.status;
-      }
 
       setReservations(prev => [createdReservation, ...prev]);
       setIsAddModalOpen(false);
-      setNewClientData({ customerName: '', customerEmail: '', customerPhone: '', status: 'Not Paid' });
+      setNewClientData({ customerName: '', customerEmail: '', customerPhone: '', status: 'Not Paid', price: 0, amountPaid: 0 });
     } catch (err: any) {
       console.error('Error adding client:', err);
       if (err.response?.status === 401) {
@@ -328,7 +345,7 @@ export const AdminPage = () => {
     }
   };
 
-  const getTripFinancials = (tripId: string, count: number, paidCount: number) => {
+  const getTripFinancials = (tripId: string, tripReservations: Reservation[]) => {
     let price = 0;
     let fixedCost = 0;
     let costPerPerson = 0;
@@ -344,14 +361,20 @@ export const AdminPage = () => {
       costPerPerson = trip?.costPerPerson || 0;
     }
 
-    const expectedIncome = count * price;
+    const expectedIncome = tripReservations.reduce((sum, r) => {
+      const defaultPrice = r.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === r.tripId)?.price || 0);
+      return sum + (r.price !== undefined && r.price !== null ? r.price : defaultPrice);
+    }, 0);
+
+    const totalAmountPaid = tripReservations.reduce((sum, r) => sum + (r.amountPaid || 0), 0);
     
-    // Income (received) is filled manually if present, otherwise default to paidCount * price
+    // Income (received) is filled manually if present, otherwise default to totalAmountPaid
     const receivedIncome = manualIncomes[tripId] !== undefined
       ? manualIncomes[tripId]
-      : (paidCount * price);
+      : totalAmountPaid;
     
     // Outcome is filled manually in TND if present (converted to Euro), otherwise default to fixedCost + (paidCount * costPerPerson)
+    const paidCount = tripReservations.filter(r => r.status === 'Paid').length;
     const totalCost = manualCosts[tripId] !== undefined
       ? (manualCosts[tripId] / 3.4)
       : (paidCount > 0 ? (fixedCost + (paidCount * costPerPerson)) : 0);
@@ -379,8 +402,7 @@ export const AdminPage = () => {
     const augmentedReservations = getAugmentedReservations();
     const tripCounts = tripsData.map(trip => {
       const tripReservations = augmentedReservations.filter(r => r.tripId === trip.id);
-      const paidReservations = tripReservations.filter(r => r.status === 'Paid');
-      const financials = getTripFinancials(trip.id, tripReservations.length, paidReservations.length);
+      const financials = getTripFinancials(trip.id, tripReservations);
       return {
         ...trip,
         reservationCount: tripReservations.length,
@@ -389,8 +411,7 @@ export const AdminPage = () => {
     });
 
     const packReservations = augmentedReservations.filter(r => r.tripId === 'pack-ultimate');
-    const packPaid = packReservations.filter(r => r.status === 'Paid');
-    const packFinancials = getTripFinancials('pack-ultimate', packReservations.length, packPaid.length);
+    const packFinancials = getTripFinancials('pack-ultimate', packReservations);
 
     // Overall Stats
     let grandExpectedIncome = 0;
@@ -403,8 +424,7 @@ export const AdminPage = () => {
 
     tripIds.forEach(id => {
       const tripReservations = augmentedReservations.filter(r => r.tripId === id);
-      const paidReservations = tripReservations.filter(r => r.status === 'Paid');
-      const financials = getTripFinancials(id, tripReservations.length, paidReservations.length);
+      const financials = getTripFinancials(id, tripReservations);
       
       grandExpectedIncome += financials.expectedIncome;
       grandReceivedIncome += financials.receivedIncome;
@@ -603,19 +623,12 @@ export const AdminPage = () => {
       const client = clientsMap[key];
       client.reservations.push(res);
 
-      let price = 0;
-      if (res.tripId === 'pack-ultimate') {
-        price = 145;
-      } else {
-        const trip = tripsData.find((t) => t.id === res.tripId);
-        price = trip ? trip.price : 0;
-      }
+      const defaultPrice = res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0);
+      const price = res.price !== undefined && res.price !== null ? res.price : defaultPrice;
+      const paidVal = res.amountPaid || 0;
 
-      if (res.status === 'Paid') {
-        client.totalPaid += price;
-      } else {
-        client.totalUnpaid += price;
-      }
+      client.totalPaid += paidVal;
+      client.totalUnpaid += Math.max(0, price - paidVal);
     });
 
     const clientsList = Object.values(clientsMap);
@@ -676,14 +689,16 @@ export const AdminPage = () => {
                           {client.email}
                         </div>
                         <div className="flex items-center text-slate-500 text-xs mt-1 animate-none">
-                          <Phone className="w-3.5 h-3.5 mr-1.5 text-slate-400 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 mr-1.5 text-slate-400 shrink-0" />
                           {client.phone}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-3">
                           {client.reservations.map((res) => {
-                            const tripPrice = res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0);
+                            const defaultTripPrice = res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0);
+                            const currentPrice = res.price !== undefined && res.price !== null ? res.price : defaultTripPrice;
+                            const currentAmountPaid = res.amountPaid || 0;
                             return (
                               <div key={res._id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
@@ -695,9 +710,28 @@ export const AdminPage = () => {
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-3">
+                                  <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-3">
                                     <span>Date: {res.date}</span>
-                                    <span>Price: {formatMoney(tripPrice)}</span>
+                                    <div className="flex items-center gap-1">
+                                      <span>Price: €</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={currentPrice}
+                                        onChange={(e) => updateReservationFields(res._id, { price: parseFloat(e.target.value) || 0 })}
+                                        className="w-14 px-1 py-0.5 border border-slate-300 rounded text-slate-800 text-center font-bold"
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span>Paid: €</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={currentAmountPaid}
+                                        onChange={(e) => updateReservationFields(res._id, { amountPaid: parseFloat(e.target.value) || 0 })}
+                                        className="w-14 px-1 py-0.5 border border-slate-300 rounded text-slate-800 text-center font-bold"
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -783,7 +817,7 @@ export const AdminPage = () => {
     const augmentedReservations = getAugmentedReservations();
     const tripReservations = augmentedReservations.filter(r => r.tripId === selectedTripId);
     const paidReservations = tripReservations.filter(r => r.status === 'Paid');
-    const financials = getTripFinancials(selectedTripId || '', tripReservations.length, paidReservations.length);
+    const financials = getTripFinancials(selectedTripId || '', tripReservations);
 
     return (
       <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -797,7 +831,18 @@ export const AdminPage = () => {
               Back to Dashboard
             </button>
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => {
+                const defaultTripPrice = selectedTripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === selectedTripId)?.price || 0);
+                setNewClientData({
+                  customerName: '',
+                  customerEmail: '',
+                  customerPhone: '',
+                  status: 'Not Paid',
+                  price: defaultTripPrice,
+                  amountPaid: 0
+                });
+                setIsAddModalOpen(true);
+              }}
               className="flex items-center bg-teal-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-teal-700 transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -885,6 +930,8 @@ export const AdminPage = () => {
                   <tr>
                     <th className="px-6 py-4 font-semibold">Customer Name</th>
                     <th className="px-6 py-4 font-semibold">Contact Info</th>
+                    <th className="px-6 py-4 font-semibold">Price</th>
+                    <th className="px-6 py-4 font-semibold">Amount Paid</th>
                     <th className="px-6 py-4 font-semibold">Date Booked</th>
                     <th className="px-6 py-4 font-semibold">Status</th>
                     <th className="px-6 py-4 font-semibold text-center">Ticket</th>
@@ -912,6 +959,30 @@ export const AdminPage = () => {
                         <div className="flex items-center text-slate-600">
                           <Phone className="w-4 h-4 mr-2 text-slate-400" />
                           {res.customerPhone}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 text-xs">€</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={res.price !== undefined && res.price !== null ? res.price : (res.tripId === 'pack-ultimate' ? 145 : (tripsData.find((t) => t.id === res.tripId)?.price || 0))}
+                            onChange={(e) => updateReservationFields(res._id, { price: parseFloat(e.target.value) || 0 })}
+                            className="w-16 px-1.5 py-1 border border-slate-300 rounded text-slate-800 text-center font-bold text-xs"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 text-xs">€</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={res.amountPaid || 0}
+                            onChange={(e) => updateReservationFields(res._id, { amountPaid: parseFloat(e.target.value) || 0 })}
+                            className="w-16 px-1.5 py-1 border border-slate-300 rounded text-slate-800 text-center font-bold text-xs"
+                          />
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-500">
@@ -1030,12 +1101,53 @@ export const AdminPage = () => {
                   <select 
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
                     value={newClientData.status}
-                    onChange={e => setNewClientData({...newClientData, status: e.target.value})}
+                    onChange={e => {
+                      const newStatus = e.target.value;
+                      let updatedAmountPaid = newClientData.amountPaid;
+                      if (newStatus === 'Paid' && newClientData.amountPaid === 0) {
+                        updatedAmountPaid = newClientData.price;
+                      } else if (newStatus === 'Not Paid') {
+                        updatedAmountPaid = 0;
+                      }
+                      setNewClientData({...newClientData, status: newStatus, amountPaid: updatedAmountPaid});
+                    }}
                   >
                     <option value="Not Paid">Not Paid</option>
                     <option value="Pending">Pending</option>
                     <option value="Paid">Paid</option>
                   </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Price (€)</label>
+                    <input 
+                      required
+                      type="number" 
+                      min="0"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-bold" 
+                      value={newClientData.price}
+                      onChange={e => {
+                        const newPrice = parseFloat(e.target.value) || 0;
+                        let updatedAmountPaid = newClientData.amountPaid;
+                        if (newClientData.status === 'Paid') {
+                          updatedAmountPaid = newPrice;
+                        }
+                        setNewClientData({...newClientData, price: newPrice, amountPaid: updatedAmountPaid});
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Amount Paid (€)</label>
+                    <input 
+                      required
+                      type="number" 
+                      min="0"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-bold" 
+                      value={newClientData.amountPaid}
+                      onChange={e => setNewClientData({...newClientData, amountPaid: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
                 </div>
                 
                 <div className="pt-4 flex gap-3">

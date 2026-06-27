@@ -8,6 +8,8 @@ export interface IReservation extends Document {
   customerPhone: string;
   date: string;
   status: 'Not Paid' | 'Pending' | 'Paid';
+  price?: number;
+  amountPaid?: number;
 }
 
 const reservationSchema = new Schema<IReservation>(
@@ -23,6 +25,8 @@ const reservationSchema = new Schema<IReservation>(
       enum: ['Not Paid', 'Pending', 'Paid'],
       default: 'Not Paid',
     },
+    price: { type: Number, default: 0 },
+    amountPaid: { type: Number, default: 0 },
   }, 
   {
     timestamps: true,

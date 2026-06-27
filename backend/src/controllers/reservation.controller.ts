@@ -4,7 +4,7 @@ import { Reservation } from '../models/reservation.model';
 
 export const createReservation = async (req: Request, res: Response) => {
   try {
-    const { tripId, tripName, customerName, customerEmail, customerPhone, date } = req.body;
+    const { tripId, tripName, customerName, customerEmail, customerPhone, date, price, amountPaid, status } = req.body;
 
     if (!tripId || !tripName || !customerName || !customerPhone || !date) {
       return res.status(400).json({ message: 'All fields are required.' });
@@ -17,7 +17,9 @@ export const createReservation = async (req: Request, res: Response) => {
       customerEmail: customerEmail || 'N/A',
       customerPhone,
       date,
-      status: 'Not Paid',
+      status: status || 'Not Paid',
+      price: price !== undefined ? price : 0,
+      amountPaid: amountPaid !== undefined ? amountPaid : 0,
     });
 
     res.status(201).json({ message: 'Reservation created successfully', reservation });
@@ -40,15 +42,20 @@ export const getReservations = async (req: Request, res: Response) => {
 export const updateReservationStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, price, amountPaid } = req.body;
 
-    if (!status) {
-      return res.status(400).json({ message: 'Status is required.' });
+    const updateFields: any = {};
+    if (status !== undefined) updateFields.status = status;
+    if (price !== undefined) updateFields.price = price;
+    if (amountPaid !== undefined) updateFields.amountPaid = amountPaid;
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ message: 'No fields to update.' });
     }
 
     const reservation = await Reservation.findByIdAndUpdate(
       id,
-      { status },
+      updateFields,
       { new: true }
     );
 
