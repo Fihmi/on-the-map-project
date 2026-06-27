@@ -16,8 +16,8 @@ export const NearestTripPopup = ({ onTripClick }: { onTripClick: (trip: Trip) =>
     const now = new Date().getTime();
 
     tripsData.forEach((trip) => {
-      const deadline = getDeadline(trip.date);
-      if (deadline) {
+      const deadline = getDeadline(trip.date, trip.registrationClosed, trip.registrationDeadline);
+      if (deadline && !trip.registrationClosed) {
         const timeDiff = deadline.getTime() - now;
         if (timeDiff > 0 && timeDiff < closestTime) {
           closestTime = timeDiff;
@@ -71,7 +71,7 @@ export const NearestTripPopup = ({ onTripClick }: { onTripClick: (trip: Trip) =>
 
               {/* Countdown badge on image */}
               <div className="absolute bottom-2 left-3">
-                <Countdown date={nearestTrip.date} />
+                <Countdown date={nearestTrip.date} registrationClosed={nearestTrip.registrationClosed} registrationDeadline={nearestTrip.registrationDeadline} />
               </div>
             </div>
 

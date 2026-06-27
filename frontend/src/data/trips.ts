@@ -57,6 +57,10 @@ export interface Trip {
   isCovered?: boolean;
   circuit?: string[];
   date?: string;
+  registrationClosed?: boolean;
+  fixedCost?: number;
+  costPerPerson?: number;
+  registrationDeadline?: string;
 }
 
 export const tripsData: Trip[] = [
@@ -73,7 +77,10 @@ export const tripsData: Trip[] = [
     coordinates: [36.8065, 10.1815], // Tunis
     isCovered: true,
     circuit: ['Bardo Museum', 'Medina of Tunis', 'Sidi Bou Said'],
-    date: 'July 11, 2026'
+    date: 'July 11, 2026',
+    fixedCost: 200,
+    costPerPerson: 10,
+    registrationDeadline: 'July 5, 2026'
   },
   {
     id: 'trip-5',
@@ -88,7 +95,9 @@ export const tripsData: Trip[] = [
     coordinates: [33.8076, 10.8451], // Kuriat Island
     isCovered: true,
     circuit: ['Kuriat Island'],
-    date: 'July 15, 2026'
+    date: 'July 15, 2026',
+    fixedCost: 300,
+    costPerPerson: 12
   },
   {
     id: 'trip-2',
@@ -103,7 +112,9 @@ export const tripsData: Trip[] = [
     coordinates: [35.5047, 11.0622], // Mahdia
     isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
-    date: 'July 20, 2026'
+    date: 'July 20, 2026',
+    fixedCost: 250,
+    costPerPerson: 10
   },
   {
     id: 'trip-6',
@@ -117,7 +128,9 @@ export const tripsData: Trip[] = [
     images: [trip6_1, trip6_2, trip6_3, trip6_4, trip6_5],
     coordinates: [33.4550, 9.0253],
     circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
-    date: 'July 22 & 23, 2026'
+    date: 'July 22 & 23, 2026',
+    fixedCost: 800,
+    costPerPerson: 40
   },
   {
     id: 'trip-3',
@@ -132,7 +145,10 @@ export const tripsData: Trip[] = [
 
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
-    date: 'July 26, 2026'
+    date: 'July 26, 2026',
+    registrationClosed: true,
+    fixedCost: 350,
+    costPerPerson: 15
   },
   {
     id: 'trip-4',
@@ -148,6 +164,8 @@ export const tripsData: Trip[] = [
     isPremium: true,
     isCovered: true,
     circuit: ['Organised Camping Trip'],
-    date: 'August 1 & 2, 2026'
+    date: 'August 1 & 2, 2026',
+    fixedCost: 150,
+    costPerPerson: 8
   }
 ];

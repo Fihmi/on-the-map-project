@@ -22,9 +22,9 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
   // useMemo gives a stable Date reference — without it, getDeadline() returns a
   // brand-new Date object every render, which causes the setInterval below to be
   // torn down and re-created on every parent re-render (wasted timer allocation).
-  const deadline = useMemo(() => getDeadline(trip?.date), [trip?.date]);
+  const deadline = useMemo(() => getDeadline(trip?.date, trip?.registrationClosed, trip?.registrationDeadline), [trip?.date, trip?.registrationClosed, trip?.registrationDeadline]);
   const [isClosed, setIsClosed] = useState(() =>
-    deadline ? deadline.getTime() <= Date.now() : false
+    trip?.registrationClosed || (deadline ? deadline.getTime() <= Date.now() : false)
   );
 
   useEffect(() => {
@@ -32,10 +32,15 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
       setSubmitSuccess(false);
       setSubmitError('');
       setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
+      setIsClosed(trip.registrationClosed || (deadline ? deadline.getTime() <= Date.now() : false));
     }
-  }, [trip?.id]);
+  }, [trip?.id, deadline]);
 
   useEffect(() => {
+    if (trip?.registrationClosed) {
+      setIsClosed(true);
+      return;
+    }
     if (!deadline) return;
     // deadline is now a stable memoized reference — this interval is only
     // recreated when the actual trip date changes, not on every re-render.
@@ -43,7 +48,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
       setIsClosed(deadline.getTime() <= Date.now());
     }, 1000);
     return () => clearInterval(timer);
-  }, [deadline]);
+  }, [deadline, trip?.registrationClosed]);
 
   // Prevent body scroll when modal is open.
   // Uses classList.add/remove instead of direct style.overflow mutation:
@@ -185,7 +190,7 @@ export const TripDetailsModal = ({ trip, onClose }: TripDetailsModalProps) => {
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Registration</p>
                       <div className="mt-1">
-                        <Countdown date={trip.date} />
+                        <Countdown date={trip.date} registrationClosed={trip.registrationClosed} registrationDeadline={trip.registrationDeadline} />
                       </div>
                     </div>
                   </div>

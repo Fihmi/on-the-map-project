@@ -1,6 +1,7 @@
 import { Star, Crown } from 'lucide-react';
 import type { Trip } from '../../data/trips';
 import { ImageCarousel } from './ImageCarousel';
+import { getDeadline } from './Countdown';
 
 interface TripCardProps {
   trip: Trip;
@@ -8,6 +9,9 @@ interface TripCardProps {
 }
 
 export const TripCard = ({ trip, onClick }: TripCardProps) => {
+  const deadline = getDeadline(trip.date, trip.registrationClosed, trip.registrationDeadline);
+  const isClosed = trip.registrationClosed || (deadline ? deadline.getTime() <= Date.now() : false);
+
   return (
     <div className={`flex flex-col cursor-pointer group relative transition-all duration-300 ${trip.isPremium
       ? 'hover:scale-[1.02] z-10 bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100'
@@ -19,7 +23,14 @@ export const TripCard = ({ trip, onClick }: TripCardProps) => {
           className="w-full aspect-square sm:aspect-[4/3] rounded-xl object-cover"
           onImageClick={() => onClick(trip)}
         />
-        {trip.isPremium && (
+        {isClosed && (
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] rounded-xl flex items-center justify-center z-20">
+            <span className="bg-red-600 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-lg border border-red-500 uppercase tracking-widest text-center max-w-[85%]">
+              This Trip Is Fully Booked
+            </span>
+          </div>
+        )}
+        {trip.isPremium && !isClosed && (
           <div className="absolute top-3 left-3 bg-white text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 z-10 border border-slate-100">
             <Crown size={14} className="text-rose-500" />
             Exceptional Trip

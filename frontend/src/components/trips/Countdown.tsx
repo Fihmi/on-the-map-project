@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 
-export const getDeadline = (dateString?: string) => {
+export const getDeadline = (dateString?: string, registrationClosed?: boolean, registrationDeadline?: string) => {
+  if (registrationClosed) return new Date(0);
+  if (registrationDeadline) {
+    const customDeadline = new Date(registrationDeadline);
+    if (!isNaN(customDeadline.getTime())) return customDeadline;
+  }
   if (!dateString) return null;
   
   // Handle multi-day format like "August 1 & 2, 2026" by stripping the "& 2" part
@@ -13,16 +18,16 @@ export const getDeadline = (dateString?: string) => {
   return deadline;
 };
 
-export const Countdown = ({ date }: { date?: string }) => {
+export const Countdown = ({ date, registrationClosed, registrationDeadline }: { date?: string; registrationClosed?: boolean; registrationDeadline?: string }) => {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; isClosed: boolean } | null>(null);
 
   useEffect(() => {
-    const deadline = getDeadline(date);
+    const deadline = getDeadline(date, registrationClosed, registrationDeadline);
     if (!deadline) return;
 
     const calculateTimeLeft = () => {
       const difference = deadline.getTime() - new Date().getTime();
-      if (difference <= 0) {
+      if (difference <= 0 || registrationClosed) {
         return { days: 0, hours: 0, minutes: 0, seconds: 0, isClosed: true };
       }
       return {
