@@ -35,6 +35,20 @@ export const AdminPage = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'trips' | 'clients'>('trips');
   const [clientSearchQuery, setClientSearchQuery] = useState('');
+  const [manualCosts, setManualCosts] = useState<{ [tripId: string]: number }>(() => {
+    try {
+      const saved = localStorage.getItem('tripManualCosts');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleCostChange = (tripId: string, value: number) => {
+    const updated = { ...manualCosts, [tripId]: value };
+    setManualCosts(updated);
+    localStorage.setItem('tripManualCosts', JSON.stringify(updated));
+  };
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newClientData, setNewClientData] = useState({
@@ -232,7 +246,12 @@ export const AdminPage = () => {
 
     const expectedIncome = count * price;
     const receivedIncome = paidCount * price;
-    const totalCost = count > 0 ? (fixedCost + (count * costPerPerson)) : 0;
+    
+    // Outcome is filled manually if present, otherwise default to fixedCost + (paidCount * costPerPerson)
+    const totalCost = manualCosts[tripId] !== undefined
+      ? manualCosts[tripId]
+      : (paidCount > 0 ? (fixedCost + (paidCount * costPerPerson)) : 0);
+      
     const netProfit = receivedIncome - totalCost;
 
     return {
@@ -244,6 +263,12 @@ export const AdminPage = () => {
       totalCost,
       netProfit
     };
+  };
+
+  const formatMoney = (euros: number) => {
+    const tnd = (euros * 3.4).toFixed(1);
+    const formattedTnd = Number(tnd).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+    return `€${euros.toLocaleString()} / ${formattedTnd} DT`;
   };
 
   const renderDashboard = () => {
@@ -288,7 +313,7 @@ export const AdminPage = () => {
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold text-slate-900">Trip Dashboard</h2>
-            <p className="text-slate-500 mt-2">Select a trip to view its registrations and financials.</p>
+            <p className="text-slate-500 mt-2">Select a trip to view registrations. Adjust Outcomes (costs) manually directly in the input fields.</p>
           </div>
         </div>
 
@@ -296,22 +321,22 @@ export const AdminPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Expected Income</div>
-            <div className="text-2xl font-black text-slate-900 mt-1">€{grandExpectedIncome}</div>
+            <div className="text-lg font-black text-slate-900 mt-1.5">{formatMoney(grandExpectedIncome)}</div>
           </div>
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Received Income</div>
-            <div className="text-2xl font-black text-green-600 mt-1">€{grandReceivedIncome}</div>
+            <div className="text-lg font-black text-green-600 mt-1.5">{formatMoney(grandReceivedIncome)}</div>
           </div>
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Outcome (Costs)</div>
-            <div className="text-2xl font-black text-red-500 mt-1">€{grandTotalCost}</div>
+            <div className="text-lg font-black text-red-500 mt-1.5">{formatMoney(grandTotalCost)}</div>
           </div>
           <div className={`p-5 rounded-2xl shadow-sm border ${
             grandNetProfit >= 0 ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200'
           }`}>
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Net Profit (from Received)</div>
-            <div className={`text-2xl font-black mt-1 ${grandNetProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-              €{grandNetProfit}
+            <div className={`text-lg font-black mt-1.5 ${grandNetProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+              {formatMoney(grandNetProfit)}
             </div>
           </div>
         </div>
@@ -330,7 +355,7 @@ export const AdminPage = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-black text-white">Ultimate Package</h3>
-                  <p className="text-white/80 text-sm mt-1">All trips except Sahara · <span className="line-through">€160</span> <span className="font-bold text-white">€145</span>/person</p>
+                  <p className="text-white/80 text-sm mt-1">All trips except Sahara · <span className="line-through">€160</span> <span className="font-bold text-white">{formatMoney(145)}</span>/person</p>
                 </div>
               </div>
               
@@ -341,15 +366,24 @@ export const AdminPage = () => {
                 </div>
                 <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
                   <div className="text-[10px] font-bold text-white/80 uppercase">Income</div>
-                  <div className="text-xl font-bold">€{packFinancials.receivedIncome}</div>
+                  <div className="text-sm font-bold">{formatMoney(packFinancials.receivedIncome)}</div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
-                  <div className="text-[10px] font-bold text-white/80 uppercase">Expenses</div>
-                  <div className="text-xl font-bold">€{packFinancials.totalCost}</div>
+                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20" onClick={(e) => e.stopPropagation()}>
+                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Expenses (Edit)</div>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-20 text-xs font-bold text-slate-800 bg-white rounded px-1.5 py-0.5 text-center"
+                    value={manualCosts['pack-ultimate'] ?? packFinancials.totalCost}
+                    onChange={(e) => handleCostChange('pack-ultimate', parseFloat(e.target.value) || 0)}
+                  />
+                  <div className="text-[9px] text-white/90 mt-1">
+                    {((manualCosts['pack-ultimate'] ?? packFinancials.totalCost) * 3.4).toFixed(0)} DT
+                  </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
                   <div className="text-[10px] font-bold text-white/80 uppercase">Profit</div>
-                  <div className="text-xl font-bold">€{packFinancials.netProfit}</div>
+                  <div className="text-sm font-bold">{formatMoney(packFinancials.netProfit)}</div>
                 </div>
               </div>
             </div>
@@ -376,23 +410,33 @@ export const AdminPage = () => {
                   </div>
 
                   {/* Financials details on card */}
-                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
                     <div>
                       <div className="text-[9px] font-bold text-slate-400 uppercase">Income</div>
                       <div className="text-xs font-bold text-slate-800">€{trip.financials.receivedIncome}</div>
-                      <div className="text-[8px] text-slate-400">of €{trip.financials.expectedIncome}</div>
+                      <div className="text-[8px] text-slate-400">{(trip.financials.receivedIncome * 3.4).toFixed(0)} DT</div>
+                      <div className="text-[8px] text-slate-400 mt-1">of €{trip.financials.expectedIncome}</div>
                     </div>
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Outcome</div>
-                      <div className="text-xs font-bold text-slate-800">€{trip.financials.totalCost}</div>
-                      <div className="text-[8px] text-slate-400">Fixed: €{trip.fixedCost}</div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Outcome (Edit)</div>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center"
+                        value={manualCosts[trip.id] ?? trip.financials.totalCost}
+                        onChange={(e) => handleCostChange(trip.id, parseFloat(e.target.value) || 0)}
+                      />
+                      <div className="text-[8px] text-slate-500 mt-1">
+                        {((manualCosts[trip.id] ?? trip.financials.totalCost) * 3.4).toFixed(0)} DT
+                      </div>
                     </div>
                     <div>
                       <div className="text-[9px] font-bold text-slate-400 uppercase">Profit</div>
                       <div className={`text-xs font-black ${trip.financials.netProfit >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                         €{trip.financials.netProfit}
                       </div>
-                      <div className="text-[8px] text-slate-400">Net</div>
+                      <div className="text-[8px] text-slate-400">{(trip.financials.netProfit * 3.4).toFixed(0)} DT</div>
+                      <div className="text-[8px] text-slate-400 mt-1">Net</div>
                     </div>
                   </div>
                 </div>
@@ -528,7 +572,7 @@ export const AdminPage = () => {
                                   <div className="font-semibold text-slate-800 text-sm">{res.tripName}</div>
                                   <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-3">
                                     <span>Date: {res.date}</span>
-                                    <span>Price: €{tripPrice}</span>
+                                    <span>Price: {formatMoney(tripPrice)}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -571,17 +615,17 @@ export const AdminPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="inline-block px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-lg font-black text-sm">
-                          €{client.totalPaid}
+                        <span className="inline-block px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-lg font-black text-sm whitespace-nowrap">
+                          {formatMoney(client.totalPaid)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-block px-3 py-1.5 rounded-lg font-black text-sm ${
+                        <span className={`inline-block px-3 py-1.5 rounded-lg font-black text-sm whitespace-nowrap ${
                           client.totalUnpaid > 0 
                             ? 'bg-red-50 border border-red-200 text-red-700' 
                             : 'bg-slate-50 border border-slate-200 text-slate-500'
                         }`}>
-                          €{client.totalUnpaid}
+                          {formatMoney(client.totalUnpaid)}
                         </span>
                       </td>
                     </tr>
@@ -662,25 +706,29 @@ export const AdminPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected Revenue</div>
-              <div className="text-lg font-black text-slate-800 mt-1">€{financials.expectedIncome}</div>
+              <div className="text-lg font-black text-slate-800 mt-1">{formatMoney(financials.expectedIncome)}</div>
               <div className="text-[10px] text-slate-400">Total Bookings * Price</div>
             </div>
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Collected Revenue</div>
-              <div className="text-lg font-black text-green-600 mt-1">€{financials.receivedIncome}</div>
+              <div className="text-lg font-black text-green-600 mt-1">{formatMoney(financials.receivedIncome)}</div>
               <div className="text-[10px] text-slate-400">Paid Bookings * Price</div>
             </div>
             <div className="bg-white px-5 py-4 rounded-xl border border-slate-200">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expenses</div>
-              <div className="text-lg font-black text-red-500 mt-1">€{financials.totalCost}</div>
-              <div className="text-[10px] text-slate-400">Fixed: €{financials.fixedCost} + Variable: €{financials.costPerPerson * tripReservations.length}</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expenses (Editable on Dashboard)</div>
+              <div className="text-lg font-black text-red-500 mt-1">{formatMoney(financials.totalCost)}</div>
+              {manualCosts[selectedTripId || ''] === undefined ? (
+                <div className="text-[10px] text-slate-400">Fixed: €{financials.fixedCost} + Paid Var: €{financials.costPerPerson * paidReservations.length}</div>
+              ) : (
+                <div className="text-[10px] text-teal-600 font-semibold">Manually set value</div>
+              )}
             </div>
             <div className={`px-5 py-4 rounded-xl border ${
               financials.netProfit >= 0 ? 'bg-green-50/20 border-green-200' : 'bg-red-50/20 border-red-200'
             }`}>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Net Profit</div>
               <div className={`text-lg font-black mt-1 ${financials.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                €{financials.netProfit}
+                {formatMoney(financials.netProfit)}
               </div>
               <div className="text-[10px] text-slate-400">Collected - Expenses</div>
             </div>
