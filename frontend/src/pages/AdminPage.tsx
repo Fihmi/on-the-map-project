@@ -37,14 +37,14 @@ export const AdminPage = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'trips' | 'clients'>('trips');
   const [clientSearchQuery, setClientSearchQuery] = useState('');
-  const [manualCosts, setManualCosts] = useState<{ [tripId: string]: number }>(() => {
+  const manualCosts = (() => {
     try {
       const saved = localStorage.getItem('tripManualCosts');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
     }
-  });
+  })();
 
   const [tripExpenses, setTripExpenses] = useState<{ [tripId: string]: { id: string, label: string, amountTnd: number }[] }>(() => {
     try {
@@ -74,26 +74,14 @@ export const AdminPage = () => {
     localStorage.setItem('tripExpenses', JSON.stringify(updated));
   };
 
-  const handleCostChange = (tripId: string, value: number) => {
-    const updated = { ...manualCosts, [tripId]: value };
-    setManualCosts(updated);
-    localStorage.setItem('tripManualCosts', JSON.stringify(updated));
-  };
-
-  const [manualIncomes, setManualIncomes] = useState<{ [tripId: string]: number }>(() => {
+  const manualIncomes = (() => {
     try {
       const saved = localStorage.getItem('tripManualIncomes');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
     }
-  });
-
-  const handleIncomeChange = (tripId: string, value: number) => {
-    const updated = { ...manualIncomes, [tripId]: value };
-    setManualIncomes(updated);
-    localStorage.setItem('tripManualIncomes', JSON.stringify(updated));
-  };
+  })();
 
   const [onTheMapClients, setOnTheMapClients] = useState<{ [clientKey: string]: boolean }>(() => {
     try {
@@ -445,7 +433,6 @@ export const AdminPage = () => {
     });
 
     const packReservations = augmentedReservations.filter(r => r.tripId === 'pack-ultimate');
-    const packFinancials = getTripFinancials('pack-ultimate', packReservations);
 
     // Overall Stats
     let grandExpectedIncome = 0;
@@ -519,36 +506,6 @@ export const AdminPage = () => {
                   <div className="text-[10px] font-bold text-white/80 uppercase">Bookings</div>
                   <div className="text-xl font-bold">{packReservations.length}</div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20" onClick={(e) => e.stopPropagation()}>
-                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Income (Edit)</div>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-20 text-xs font-bold text-slate-800 bg-white rounded px-1.5 py-0.5 text-center"
-                    value={manualIncomes['pack-ultimate'] ?? packFinancials.receivedIncome}
-                    onChange={(e) => handleIncomeChange('pack-ultimate', parseFloat(e.target.value) || 0)}
-                  />
-                  <div className="text-[9px] text-white/90 mt-1">
-                    {((manualIncomes['pack-ultimate'] ?? packFinancials.receivedIncome) * 3.4).toFixed(0)} DT
-                  </div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20" onClick={(e) => e.stopPropagation()}>
-                  <div className="text-[10px] font-bold text-white/80 uppercase mb-1">Expenses (Edit DT)</div>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-20 text-xs font-bold text-slate-800 bg-white rounded px-1.5 py-0.5 text-center"
-                    value={manualCosts['pack-ultimate'] !== undefined ? manualCosts['pack-ultimate'] : (packFinancials.totalCost * 3.4).toFixed(0)}
-                    onChange={(e) => handleCostChange('pack-ultimate', parseFloat(e.target.value) || 0)}
-                  />
-                  <div className="text-[9px] text-white/90 mt-1">
-                    €{packFinancials.totalCost.toFixed(1)}
-                  </div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20">
-                  <div className="text-[10px] font-bold text-white/80 uppercase">Profit</div>
-                  <div className="text-sm font-bold">{formatMoney(packFinancials.netProfit)}</div>
-                </div>
               </div>
             </div>
           </div>
@@ -573,47 +530,7 @@ export const AdminPage = () => {
                     {trip.date || 'TBD'}
                   </div>
 
-                  {/* Financials details on card */}
-                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Income</div>
-                      <div className="text-xs font-bold text-slate-800 mt-1">
-                        €{trip.financials.receivedIncome}
-                      </div>
-                      <div className="text-[8px] text-slate-500 mt-1">
-                        {(trip.financials.receivedIncome * 3.4).toFixed(0)} DT
-                      </div>
-                    </div>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">
-                        Outcome {tripExpenses[trip.id]?.length > 0 ? '(Detailed)' : '(Edit DT)'}
-                      </div>
-                      <input
-                        type="number"
-                        min="0"
-                        disabled={tripExpenses[trip.id]?.length > 0}
-                        className={`w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-1 py-0.5 text-center ${
-                          tripExpenses[trip.id]?.length > 0 ? 'bg-slate-100/80 cursor-not-allowed text-slate-500' : ''
-                        }`}
-                        value={tripExpenses[trip.id]?.length > 0 
-                          ? tripExpenses[trip.id].reduce((sum, item) => sum + item.amountTnd, 0).toFixed(0)
-                          : (manualCosts[trip.id] !== undefined ? manualCosts[trip.id] : (trip.financials.totalCost * 3.4).toFixed(0))
-                        }
-                        onChange={(e) => handleCostChange(trip.id, parseFloat(e.target.value) || 0)}
-                      />
-                      <div className="text-[8px] text-slate-500 mt-1">
-                        €{trip.financials.totalCost.toFixed(1)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Profit</div>
-                      <div className={`text-xs font-black ${trip.financials.netProfit >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                        €{trip.financials.netProfit}
-                      </div>
-                      <div className="text-[8px] text-slate-400">{(trip.financials.netProfit * 3.4).toFixed(0)} DT</div>
-                      <div className="text-[8px] text-slate-400 mt-1">Net</div>
-                    </div>
-                  </div>
+                  
                 </div>
               </div>
 
