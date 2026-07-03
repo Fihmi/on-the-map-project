@@ -80,7 +80,7 @@ export const tripsData: Trip[] = [
     date: 'July 11, 2026',
     fixedCost: 200,
     costPerPerson: 10,
-    registrationDeadline: 'July 5, 2026'
+    registrationDeadline: 'July 7, 2026'
   },
   {
     id: 'trip-5',
@@ -96,6 +96,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['Kuriat Island'],
     date: 'July 15, 2026',
+    registrationDeadline: 'July 13, 2026',
     fixedCost: 300,
     costPerPerson: 12
   },
@@ -113,6 +114,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
     date: 'July 20, 2026',
+    registrationDeadline: 'July 10, 2026',
     fixedCost: 250,
     costPerPerson: 10
   },
@@ -129,6 +131,7 @@ export const tripsData: Trip[] = [
     coordinates: [33.4550, 9.0253],
     circuit: ['Tozeur', 'Ong Jmal', 'Starwars Sites ', 'Tameghza'],
     date: 'July 22 & 23, 2026',
+    registrationDeadline: 'July 12, 2026',
     fixedCost: 800,
     costPerPerson: 40
   },
@@ -146,7 +149,7 @@ export const tripsData: Trip[] = [
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
     date: 'July 26, 2026',
-    registrationDeadline: 'July 18, 2026',
+    registrationDeadline: 'July 11, 2026',
     fixedCost: 350,
     costPerPerson: 15
   },
