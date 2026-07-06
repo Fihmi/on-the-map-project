@@ -80,7 +80,7 @@ export const tripsData: Trip[] = [
     date: 'July 11, 2026',
     fixedCost: 200,
     costPerPerson: 10,
-    registrationDeadline: 'July 7, 2026'
+    registrationDeadline: 'July 8, 2026'
   },
   {
     id: 'trip-5',
@@ -95,8 +95,8 @@ export const tripsData: Trip[] = [
     coordinates: [33.8076, 10.8451], // Kuriat Island
     isCovered: true,
     circuit: ['Kuriat Island'],
-    date: 'July 15, 2026',
-    registrationDeadline: 'July 13, 2026',
+    date: 'July 17, 2026',
+    registrationDeadline: 'July 14, 2026',
     fixedCost: 300,
     costPerPerson: 12
   },
@@ -114,7 +114,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
     date: 'July 20, 2026',
-    registrationDeadline: 'July 10, 2026',
+    registrationDeadline: 'July 15, 2026',
     fixedCost: 250,
     costPerPerson: 10
   },
