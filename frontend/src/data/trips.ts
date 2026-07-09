@@ -80,7 +80,7 @@ export const tripsData: Trip[] = [
     date: 'July 11, 2026',
     fixedCost: 200,
     costPerPerson: 10,
-    registrationDeadline: 'July 8, 2026'
+    registrationDeadline: 'July 10, 2026'
   },
   {
     id: 'trip-5',
@@ -149,7 +149,7 @@ export const tripsData: Trip[] = [
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
     date: 'July 26, 2026',
-    registrationDeadline: 'July 11, 2026',
+    registrationDeadline: 'July 12, 2026',
     fixedCost: 350,
     costPerPerson: 15
   },
