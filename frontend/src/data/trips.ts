@@ -80,7 +80,7 @@ export const tripsData: Trip[] = [
     date: 'July 11, 2026',
     fixedCost: 200,
     costPerPerson: 10,
-    registrationDeadline: 'July 11, 2026'
+    registrationDeadline: 'July 12, 2026'
   },
   {
     id: 'trip-5',
