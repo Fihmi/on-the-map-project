@@ -114,7 +114,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['El Djem Amphitheatre', 'Mahdia', 'Monastir'],
     date: 'July 20, 2026',
-    registrationDeadline: 'July 18, 2026',
+    registrationDeadline: 'July 21, 2026',
     fixedCost: 250,
     costPerPerson: 10
   },
@@ -149,7 +149,7 @@ export const tripsData: Trip[] = [
     coordinates: [37.2746, 9.8739], // Bizerte
     circuit: ['Cap Serrat, Bizerte'],
     date: 'July 26, 2026',
-    registrationDeadline: 'July 15, 2026',
+    registrationDeadline: 'July 23, 2026',
     fixedCost: 350,
     costPerPerson: 15
   },
@@ -168,6 +168,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['Organised Camping Trip'],
     date: 'August 1 & 2, 2026',
+    registrationDeadline: 'July 29, 2026',
     fixedCost: 150,
     costPerPerson: 8
   }
