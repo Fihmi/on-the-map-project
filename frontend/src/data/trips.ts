@@ -168,7 +168,7 @@ export const tripsData: Trip[] = [
     isCovered: true,
     circuit: ['Organised Camping Trip'],
     date: 'August 1 & 2, 2026',
-    registrationDeadline: 'July 29, 2026',
+    registrationDeadline: 'August 1, 2026',
     fixedCost: 150,
     costPerPerson: 8
   }
